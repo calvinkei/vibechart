@@ -195,9 +195,7 @@ export class DrawingManager {
 
   hitTest(x: number, y: number, paneId: string): DrawingHit | null {
     if (this.hideAll) return null;
-    const ctx = document.createElement('canvas').getContext('2d');
-    if (!ctx) return null;
-    const rc = this.renderContext(ctx, paneId, this.model.timeScale.width, this._pane(paneId)?.height ?? 0, 1, '12px sans-serif', null);
+    const rc = this._rcFor(paneId);
     if (!rc) return null;
     const resSec = this.model.resolutionSeconds();
     // top-most first

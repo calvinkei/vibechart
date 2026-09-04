@@ -1,4 +1,4 @@
-import { DataSource, type RenderContext, type LegendItem, type AxisLabel } from './Series';
+import { DataSource, type RenderContext, type LegendItem, type AxisLabel, type HitResult } from './Series';
 import type { PriceRange } from '../core/PriceScale';
 import type { Bar, Datafeed, ResolutionString, SymbolInfo } from '../data/types';
 import { DataLoader } from '../data/DataLoader';
@@ -139,7 +139,7 @@ export class CompareSeries extends DataSource {
     return [];
   }
 
-  override hitTest(x: number, y: number, rc: { timeScale: TimeScale; priceScale: PriceScale }) {
+  override hitTest(x: number, y: number, rc: { timeScale: TimeScale; priceScale: PriceScale }): HitResult | null {
     const i = rc.timeScale.xToBarIndex(x);
     const b = this.aligned[i];
     if (!b || !Number.isFinite(b.close)) return null;
