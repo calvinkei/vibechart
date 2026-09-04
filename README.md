@@ -42,12 +42,16 @@ CommonJS (`const { Chart } = require('vibechart')`) and a browser `<script>` tag
 </script>
 ```
 
-| Build | File | Entry |
-| --- | --- | --- |
-| ESM | `dist/vibechart.mjs` | `import` |
-| CommonJS | `dist/vibechart.cjs` | `require` |
-| UMD (global `VibeChart`) | `dist/vibechart.umd.js` | `<script>`, CDN |
-| Types | `dist/index.d.ts` | TypeScript |
+| Build | File | Used by | Size |
+| --- | --- | --- | --- |
+| ESM | `dist/vibechart.mjs` | `import`, bundlers | 224 KB gzip |
+| UMD (global `VibeChart`) | `dist/vibechart.umd.js` | `require`, `<script>`, CDN | 198 KB gzip |
+| Types | `dist/index.d.ts` | TypeScript | — |
+
+The UMD build doubles as the CommonJS entry, so there is no third copy of the
+same code in your `node_modules`. The ESM build is deliberately left
+unminified-whitespace so its `/* @__PURE__ */` annotations survive for your
+bundler to tree-shake; your own minifier handles the rest.
 
 ## Develop
 

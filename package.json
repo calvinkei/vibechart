@@ -1,8 +1,8 @@
 {
   "name": "vibechart",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Dependency-free, framework-free financial charting library in pure TypeScript/Canvas 2D: 18 chart types, 91 drawing tools, 173 technical indicators, lazy history loading, multi-pane layouts, themes and a full trading-terminal UI. TradingView-compatible datafeed API.",
-  "main": "./dist/vibechart.cjs",
+  "main": "./dist/vibechart.umd.js",
   "module": "./dist/vibechart.mjs",
   "types": "./dist/index.d.ts",
   "unpkg": "./dist/vibechart.umd.js",
@@ -11,7 +11,7 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/vibechart.mjs",
-      "require": "./dist/vibechart.cjs",
+      "require": "./dist/vibechart.umd.js",
       "default": "./dist/vibechart.mjs"
     },
     "./package.json": "./package.json"

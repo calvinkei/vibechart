@@ -9,9 +9,9 @@ export default defineConfig(({ command }) => ({
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'VibeChart',
-      formats: ['es', 'cjs', 'umd'],
+      formats: ['es', 'umd'],
       fileName: (format) =>
-        format === 'es' ? 'vibechart.mjs' : format === 'cjs' ? 'vibechart.cjs' : 'vibechart.umd.js',
+        format === 'es' ? 'vibechart.mjs' : 'vibechart.umd.js',
     },
     sourcemap: false,
     minify: 'esbuild',
