@@ -1,0 +1,97 @@
+/* Dialog-specific styles (chart/indicator/drawing settings, indicator search, symbol search, object tree, go-to, templates). */
+.oc-dialog-backdrop .oc-dialog { max-height: 92%; max-width: 94%; }
+.oc-settings-dialog .oc-dialog-body { height: 470px; max-height: 65vh; }
+.oc-dialog .oc-form-row > label { flex: 0 0 170px; }
+.oc-dlg-note { margin: 8px 0; padding: 8px 10px; border-radius: 4px; background: var(--oc-bg2); color: var(--oc-text2); font-size: 12px; line-height: 1.4; }
+.oc-dlg-inline { display: inline-flex; align-items: center; gap: 6px; }
+.oc-dlg-inline > span { color: var(--oc-text2); font-size: 11px; }
+.oc-dlg-range { width: 90px; accent-color: var(--oc-accent); }
+.oc-dlg-range-val { min-width: 34px; font-size: 11px; color: var(--oc-text2); text-align: right; }
+.oc-dlg-flash { animation: oc-dlg-flash .6s ease-out; }
+@keyframes oc-dlg-flash { 0% { background: var(--oc-active); } 100% { background: transparent; } }
+.oc-menu.oc-dlg-menu { z-index: 1200; }
+.oc-root input.oc-input[type="date"], .oc-root input.oc-input[type="time"], .oc-root input.oc-input[type="datetime-local"] { width: auto; min-width: 150px; color-scheme: light; }
+.oc-root.oc-theme-dark input.oc-input[type="date"], .oc-root.oc-theme-dark input.oc-input[type="time"], .oc-root.oc-theme-dark input.oc-input[type="datetime-local"] { color-scheme: dark; }
+
+/* Plot style rows (indicator settings) */
+.oc-plot-row { display: flex; align-items: center; gap: 6px; padding: 5px 0; min-height: 34px; flex-wrap: wrap; }
+.oc-plot-row .oc-plot-title { flex: 0 0 140px; display: inline-flex; align-items: center; gap: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.oc-plot-row .oc-select { min-width: 96px; }
+.oc-plot-row .oc-input[type="number"] { width: 76px; }
+
+/* Visibility (interval buckets) */
+.oc-vis-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; min-height: 34px; }
+.oc-vis-row .oc-vis-label { flex: 0 0 120px; }
+.oc-vis-row .oc-input[type="number"] { width: 72px; }
+.oc-vis-row .oc-vis-dash { color: var(--oc-text2); }
+
+/* Indicators search dialog */
+.oc-ind-dialog .oc-dialog-body { padding: 0; display: flex; flex-direction: column; min-height: 0; }
+.oc-dlg-search { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-bottom: 1px solid var(--oc-border); flex: 0 0 auto; }
+.oc-dlg-search .oc-icon { width: 20px; height: 20px; color: var(--oc-text2); flex: 0 0 auto; }
+.oc-dlg-search .oc-search-input { border: 0; flex: 1 1 auto; }
+.oc-ind-layout { display: flex; height: 62vh; max-height: 520px; min-height: 280px; }
+.oc-ind-cats { flex: 0 0 190px; border-right: 1px solid var(--oc-border); overflow: auto; padding: 6px 0; }
+.oc-ind-cat { display: flex; align-items: center; gap: 8px; padding: 7px 14px; cursor: pointer; color: var(--oc-text); }
+.oc-ind-cat:hover { background: var(--oc-hover); }
+.oc-ind-cat.oc-active { background: var(--oc-active); color: var(--oc-accent); font-weight: 600; }
+.oc-ind-cat .oc-badge { margin-left: auto; }
+.oc-ind-cat-title { padding: 8px 14px 2px; font-size: 11px; text-transform: uppercase; color: var(--oc-text2); letter-spacing: .04em; }
+.oc-ind-list { flex: 1 1 auto; overflow: auto; padding: 4px 0; }
+.oc-ind-row { display: flex; align-items: center; gap: 10px; padding: 7px 14px; cursor: pointer; }
+.oc-ind-row:hover, .oc-ind-row.oc-active { background: var(--oc-hover); }
+.oc-ind-row .oc-ind-name { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.oc-ind-row .oc-ind-cat-badge { color: var(--oc-text2); font-size: 11px; }
+.oc-ind-star { display: inline-flex; width: 22px; height: 22px; align-items: center; justify-content: center; border: 0; background: transparent; color: var(--oc-text2); cursor: pointer; border-radius: 3px; opacity: 0; padding: 0; }
+.oc-ind-row:hover .oc-ind-star, .oc-ind-star.oc-active { opacity: 1; }
+.oc-ind-star.oc-active { color: #ff9800; }
+.oc-ind-star svg { width: 18px; height: 18px; }
+.oc-ind-empty { padding: 24px; text-align: center; color: var(--oc-text2); }
+
+/* Symbol search */
+.oc-sym-dialog .oc-dialog-body { padding: 0; display: flex; flex-direction: column; }
+.oc-sym-filters { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--oc-border); flex-wrap: wrap; }
+.oc-sym-filters .oc-select { min-width: 140px; }
+.oc-sym-list { height: 50vh; max-height: 420px; min-height: 200px; overflow: auto; padding: 4px 0; }
+.oc-sym-row { display: grid; grid-template-columns: 120px 1fr auto auto; align-items: center; gap: 10px; padding: 8px 14px; cursor: pointer; }
+.oc-sym-row:hover, .oc-sym-row.oc-active { background: var(--oc-hover); }
+.oc-sym-row .oc-sym-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.oc-sym-row .oc-sym-desc { color: var(--oc-text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.oc-sym-row .oc-sym-exch, .oc-sym-row .oc-sym-type { color: var(--oc-text2); font-size: 11px; text-transform: uppercase; }
+.oc-sym-status { padding: 8px 14px; color: var(--oc-text2); font-size: 12px; border-top: 1px solid var(--oc-border); min-height: 32px; }
+.oc-sym-radios { display: flex; gap: 14px; padding: 8px 14px; border-bottom: 1px solid var(--oc-border); flex-wrap: wrap; }
+.oc-sym-radios label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+
+/* Object tree */
+.oc-object-tree { width: 320px; max-height: 80%; }
+.oc-object-tree .oc-dialog-body { padding: 6px 8px; }
+.oc-tree-section { padding: 6px 8px 2px; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--oc-text2); }
+.oc-tree-row { position: relative; }
+.oc-tree-row .oc-tree-name { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.oc-tree-row .oc-tree-sub { color: var(--oc-text2); font-size: 11px; margin-left: 4px; }
+.oc-tree-row.oc-hidden .oc-tree-name { opacity: .45; }
+.oc-tree-row .oc-tree-actions { opacity: 0; }
+.oc-tree-row:hover .oc-tree-actions, .oc-tree-row.oc-active .oc-tree-actions { opacity: 1; }
+.oc-tree-btn { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 22px; border: 0; border-radius: 3px; background: transparent; color: var(--oc-text2); cursor: pointer; padding: 0; }
+.oc-tree-btn:hover { background: var(--oc-bg3); color: var(--oc-text); }
+.oc-tree-btn.oc-on { color: var(--oc-accent); }
+.oc-tree-btn svg { width: 18px; height: 18px; }
+.oc-tree-handle { cursor: grab; color: var(--oc-text2); display: inline-flex; width: 16px; height: 18px; flex: 0 0 auto; }
+.oc-tree-handle svg { width: 16px; height: 16px; }
+.oc-tree-row.oc-dragging { opacity: .4; }
+.oc-tree-row.oc-drop-before { box-shadow: inset 0 2px 0 var(--oc-accent); }
+.oc-tree-row.oc-drop-after { box-shadow: inset 0 -2px 0 var(--oc-accent); }
+.oc-tree-rename { height: 22px; padding: 0 4px; font: inherit; border: 1px solid var(--oc-accent); border-radius: 3px; background: var(--oc-bg); color: var(--oc-text); width: 100%; }
+.oc-tree-empty { padding: 8px 12px; color: var(--oc-text2); font-size: 12px; }
+
+/* Templates */
+.oc-tpl-row { display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-radius: 4px; }
+.oc-tpl-row:hover { background: var(--oc-hover); }
+.oc-tpl-row .oc-tpl-name { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.oc-tpl-row .oc-tpl-meta { color: var(--oc-text2); font-size: 11px; }
+.oc-tpl-save { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+.oc-tpl-save .oc-input { flex: 1 1 auto; }
+
+/* Go to date */
+.oc-goto-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
+.oc-goto-row label { flex: 0 0 60px; color: var(--oc-text2); }

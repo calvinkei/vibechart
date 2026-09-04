@@ -131,3 +131,96 @@
 .oc-textarea { width: 100%; min-height: 60px; border: 1px solid var(--oc-border); border-radius: 4px; padding: 6px; background: var(--oc-bg); color: var(--oc-text); font: inherit; resize: vertical; }
 .oc-kbd { display: inline-block; padding: 1px 5px; border: 1px solid var(--oc-border); border-radius: 3px; font-size: 11px; color: var(--oc-text2); }
 .oc-badge { display: inline-block; padding: 0 6px; border-radius: 8px; background: var(--oc-bg3); font-size: 10px; color: var(--oc-text2); }
+.oc-replay-bar { position: absolute; left: 50%; top: 8px; transform: translateX(-50%); z-index: 40; display: flex; align-items: center; gap: 4px; padding: 4px 8px; background: var(--oc-bg); border: 1px solid var(--oc-border); border-radius: 8px; box-shadow: var(--oc-shadow); font-size: 12px; }
+.oc-replay-bar .oc-select { height: 26px; min-width: 90px; }
+.oc-replay-status { color: var(--oc-text2); padding: 0 6px; white-space: nowrap; }
+.oc-replay-selecting .oc-pane { cursor: col-resize !important; }
+/* ---- UI chrome: top toolbar ---- */
+.oc-tb-group { display: flex; align-items: center; gap: 2px; min-width: 0; }
+.oc-tb-left { flex: 1 1 auto; overflow: hidden; }
+.oc-tb-right { flex: 0 0 auto; margin-left: auto; }
+.oc-top-toolbar .oc-btn { height: 30px; font-size: 13px; font-weight: 500; }
+.oc-top-toolbar .oc-icon-btn { padding: 0 5px; }
+.oc-top-toolbar .oc-btn.oc-active { background: transparent; color: var(--oc-accent); }
+.oc-top-toolbar .oc-btn.oc-active:hover { background: var(--oc-hover); }
+.oc-symbol-btn { font-weight: 700; font-size: 14px; }
+.oc-symbol-btn .oc-icon { color: var(--oc-text2); }
+.oc-interval-btn { padding: 0 6px; min-width: 30px; font-weight: 600; }
+.oc-interval-dd { padding: 0 4px 0 6px; font-weight: 600; }
+.oc-interval-dd.oc-icon-btn { padding: 0 2px; min-width: 20px; }
+.oc-charttype-dd { padding: 0 2px 0 5px; }
+.oc-dd-chevron { width: 14px; height: 14px; color: var(--oc-text2); flex: 0 0 auto; }
+.oc-dd-chevron svg { width: 14px; height: 14px; }
+.oc-indicators-btn { font-weight: 500; }
+/* menu rows with favourite stars */
+.oc-menu-row { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; }
+.oc-menu-row .oc-check { width: 16px; text-align: center; color: var(--oc-accent); flex: 0 0 auto; }
+.oc-menu-row .oc-menu-label { flex: 1 1 auto; white-space: nowrap; }
+.oc-menu-row .oc-shortcut { color: var(--oc-text2); font-size: 11px; padding-left: 16px; }
+.oc-menu-row .oc-fav { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 18px; margin-left: 12px; color: var(--oc-text2); opacity: 0; cursor: pointer; border-radius: 3px; flex: 0 0 auto; }
+.oc-menu-row .oc-fav svg { width: 16px; height: 16px; fill: currentColor; }
+.oc-menu-item:hover .oc-menu-row .oc-fav, .oc-menu-row .oc-fav.oc-active { opacity: 1; }
+.oc-menu-row .oc-fav.oc-active { color: #ff9800; }
+.oc-menu-row .oc-fav:hover { background: var(--oc-bg3); }
+.oc-menu-item.oc-active { color: var(--oc-accent); }
+.oc-interval-custom { display: flex; align-items: center; gap: 6px; width: 100%; padding: 2px 0; }
+.oc-interval-custom .oc-input { flex: 1 1 auto; min-width: 160px; height: 28px; }
+.oc-menu .oc-menu-item .oc-icon svg { fill: currentColor; }
+/* toast + confirm */
+.oc-toast { position: absolute; left: 50%; bottom: 44px; transform: translateX(-50%); z-index: 300; background: #131722; color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 12px; box-shadow: var(--oc-shadow); pointer-events: none; white-space: nowrap; }
+.oc-confirm-text { padding: 8px 0 4px; line-height: 1.5; }
+.oc-confirm .oc-dialog-body { min-height: 0; }
+/* ---- left toolbar ---- */
+.oc-left-toolbar-inner { display: flex; flex-direction: column; align-items: center; height: 100%; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding: 4px 0; gap: 1px; }
+.oc-left-toolbar-inner::-webkit-scrollbar { display: none; }
+.oc-left-toolbar .oc-tool-group { position: relative; flex: 0 0 auto; }
+.oc-left-toolbar .oc-btn { width: 38px; height: 34px; border-radius: 4px; padding: 0; margin: 0; color: var(--oc-text); }
+.oc-left-toolbar .oc-btn svg { width: 26px; height: 26px; }
+.oc-left-toolbar .oc-btn.oc-active { color: var(--oc-accent); background: transparent; }
+.oc-left-toolbar .oc-btn.oc-active:hover { background: var(--oc-hover); }
+.oc-left-toolbar .oc-tool-arrow-zone { position: absolute; right: 0; bottom: 0; width: 14px; height: 14px; cursor: pointer; }
+.oc-left-toolbar .oc-tool-arrow { right: 3px; bottom: 3px; }
+.oc-left-toolbar .oc-tool-arrow-zone:hover .oc-tool-arrow { border-bottom-color: var(--oc-accent); }
+.oc-left-toolbar .oc-sep-h { width: 26px; height: 1px; background: var(--oc-border); margin: 4px 0; flex: 0 0 auto; }
+.oc-left-toolbar .oc-spacer { flex: 1 1 auto; min-height: 8px; }
+.oc-left-toolbar .oc-tool-favs { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.oc-tool-flyout .oc-menu-item { display: flex; align-items: center; gap: 8px; padding: 6px 12px; cursor: pointer; white-space: nowrap; color: var(--oc-text); }
+.oc-tool-flyout .oc-menu-item:hover { background: var(--oc-hover); }
+.oc-tool-flyout .oc-menu-item.oc-active { color: var(--oc-accent); }
+.oc-tool-flyout .oc-menu-item svg { width: 22px; height: 22px; fill: currentColor; flex: 0 0 auto; }
+.oc-tool-flyout .oc-menu-item .oc-icon { width: 22px; height: 22px; }
+.oc-tool-flyout .oc-menu-title { padding: 6px 12px 2px; }
+/* cursor modes (inline cursor set by the core is overridden with !important) */
+.oc-root.oc-cursor-arrow .oc-pane[style*="crosshair"] { cursor: default !important; }
+.oc-root.oc-cursor-dot .oc-pane[style*="crosshair"] { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'><circle cx='8' cy='8' r='3.5' fill='%23131722' stroke='white' stroke-width='1.5'/></svg>") 8 8, crosshair !important; }
+.oc-root.oc-theme-dark.oc-cursor-dot .oc-pane[style*="crosshair"] { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'><circle cx='8' cy='8' r='3.5' fill='white' stroke='%23131722' stroke-width='1.5'/></svg>") 8 8, crosshair !important; }
+.oc-root.oc-cursor-eraser .oc-pane[style*="crosshair"], .oc-root.oc-cursor-eraser .oc-pane[style*="pointer"] { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'><path d='M12.5 2.5l5 5-8.5 8.5H5.5l-3-3z' fill='white' stroke='%23131722' stroke-width='1.3'/><path d='M7 9l4 4' stroke='%23131722' stroke-width='1.3'/></svg>") 3 16, auto !important; }
+/* ---- floating drawing toolbar ---- */
+.oc-floating-toolbar { gap: 1px; padding: 2px 4px; }
+.oc-floating-toolbar[hidden] { display: none; }
+.oc-floating-toolbar .oc-btn { height: 28px; min-width: 28px; padding: 0 4px; }
+.oc-floating-toolbar .oc-btn svg { width: 20px; height: 20px; }
+.oc-floating-toolbar .oc-color-btn { width: 26px; height: 26px; margin: 0 2px; }
+.oc-floating-toolbar .oc-ft-grip { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 28px; cursor: move; color: var(--oc-text2); margin-right: 2px; }
+.oc-floating-toolbar .oc-ft-grip svg { width: 14px; height: 14px; fill: currentColor; }
+.oc-floating-toolbar .oc-sep { height: 18px; margin: 0 3px; }
+/* ---- bottom bar ---- */
+.oc-bb-left, .oc-bb-right { display: flex; align-items: center; gap: 2px; }
+.oc-bb-right { margin-left: auto; }
+.oc-bottom-bar .oc-sep { height: 14px; margin: 0 4px; }
+.oc-range-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 20px; font-weight: 600; }
+.oc-range-btn.oc-active { color: var(--oc-accent); }
+.oc-range-btn svg { width: 16px; height: 16px; fill: currentColor; }
+.oc-goto-btn { padding: 2px 4px; }
+.oc-clock-btn { font-variant-numeric: tabular-nums; font-weight: 500; }
+.oc-scale-btn { min-width: 26px; padding: 2px 5px; }
+/* ---- navigation buttons ---- */
+.oc-nav-buttons.oc-nav-show { display: flex; }
+.oc-nav-btn[hidden] { display: none; }
+.oc-nav-btn svg { width: 18px; height: 18px; fill: currentColor; }
+.oc-nav-btn.oc-nav-realtime { color: var(--oc-accent); }
+/* ---- shortcuts dialog ---- */
+.oc-shortcuts { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 28px; padding: 4px 0 8px; }
+.oc-shortcuts h4 { margin: 8px 0 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--oc-text2); }
+.oc-shortcut-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 3px 0; }
+.oc-shortcut-row .oc-kbd { white-space: nowrap; }

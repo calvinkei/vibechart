@@ -77,6 +77,18 @@ export const ICONS: Record<string, string> = {
   ruler: s('<path d="M3 19L19 3l6 6L9 25zm1.4 0L9 23.6 23.6 9 19 4.4zM7 17l2-2 1 1-2 2zm3-3l2-2 1 1-2 2zm3-3l2-2 1 1-2 2zm3-3l2-2 1 1-2 2z"/>'),
   sync: s('<path d="M14 4a10 10 0 0 1 8.7 5H20v1h5V5h-1v3.2A11 11 0 0 0 3 14h1A10 10 0 0 1 14 4zm10 10a10 10 0 0 1-18.7 5H8v-1H3v5h1v-3.2A11 11 0 0 0 25 14z"/>'),
   handle: s('<path d="M14 4l3 3h-2v5h5V10l3 3-3 3v-2h-5v5h2l-3 3-3-3h2v-5H8v2l-3-3 3-3v2h5V7h-2z"/>'),
+  // ui chrome additions (appended)
+  copy: s('<path d="M4 4h14v14H4zm1 1v12h12V5zm15 5h4v14H10v-4h1v3h12V11h-3z"/>'),
+  reset: s('<path d="M14 5a9 9 0 1 1-8.5 6h1.1A8 8 0 1 0 14 6V9L9 5.5 14 2z"/>'),
+  bringToFront: s('<path d="M10 4h14v14H10zm1 1v12h12V5zM4 10h5v1H5v12h12v-4h1v5H4z"/><path d="M14 8h6v6h-6z"/>'),
+  sendToBack: s('<path d="M10 4h14v14h-4v-1h3V5H11v3h-1zM4 10h14v14H4zm1 1v12h12V11z"/><path d="M8 14h6v6H8z"/>'),
+  bringForward: s('<path d="M14 6l5 5-.7.7L15 8.4V22h-1V8.4l-3.3 3.3L10 11z"/><path d="M5 4h18v1H5z"/>'),
+  sendBackward: s('<path d="M14 22l-5-5 .7-.7 3.3 3.3V6h1v13.6l3.3-3.3.7.7z"/><path d="M5 23h18v1H5z"/>'),
+  pencil: s('<path d="M19.5 4l4.5 4.5L10 22.5 4 24l1.5-6zM7 18.3l-.9 3.6 3.6-.9L21.9 8.5 19.5 6.1zm12.5-13.6l-1.4 1.4 2.4 2.4 1.4-1.4z"/>'),
+  keyboard: s('<path d="M3 7h22v14H3zm1 1v12h20V8zm2 2h2v2H6zm4 0h2v2h-2zm4 0h2v2h-2zm4 0h2v2h-2zm4 0h2v2h-2zM6 14h2v2H6zm4 0h2v2h-2zm4 0h2v2h-2zm4 0h2v2h-2zm4 0h2v2h-2zM8 18h12v1H8z"/>'),
+  crossCursor: s('<path d="M14 3v8h-1V3zm0 14v8h-1v-8zM3 13h8v1H3zm14 0h8v1h-8zm-3 1a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>'),
+  goToDate: s('<path d="M8 3h1v2h10V3h1v2h4v19H4V5h4zm-3 3v4h18V6zm0 5v12h18V11zm9 2l4 4-4 4-.7-.7 2.8-2.8H8v-1h8.1l-2.8-2.8z"/>'),
+  percent: s('<path d="M20 5l1 .8L8 23l-1-.8zM8.5 5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7zm0 1a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zm11 10a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7zm0 1a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z"/>'),
 };
 
 export function icon(name: string, size = 18): HTMLSpanElement {

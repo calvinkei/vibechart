@@ -65,7 +65,7 @@ export interface ChartEvents extends Record<string, unknown> {
   loading: boolean;
   error: string;
   themeChanged: ThemeName;
-  contextMenu: { x: number; y: number; paneId: string | null; target: 'pane' | 'priceAxis' | 'timeAxis' | 'drawing'; drawing?: Drawing };
+  contextMenu: { x: number; y: number; paneId: string | null; target: 'pane' | 'priceAxis' | 'timeAxis' | 'drawing'; drawing?: Drawing; side?: 'left' | 'right' };
   openDialog: { type: string; payload?: unknown };
   optionsChanged: ChartOptions;
   toolChanged: string | null;
@@ -717,9 +717,17 @@ export class Chart {
     this._updateCursor();
   }
 
+  private _cursorOverride: string | null = null;
+  /** Override the pane cursor (e.g. cursor modes in the UI); null restores automatic cursors. */
+  setCursorStyle(style: string | null): void {
+    this._cursorOverride = style;
+    this._updateCursor();
+  }
+
   private _updateCursor(): void {
     const c = this.drawings.cursor;
-    for (const r of this._rows) r.view.el.style.cursor = c || (this._drag?.kind === 'scroll' && this._drag.moved ? 'grabbing' : 'crosshair');
+    const auto = c || (this._drag?.kind === 'scroll' && this._drag.moved ? 'grabbing' : 'crosshair');
+    for (const r of this._rows) r.view.el.style.cursor = this._cursorOverride && !c ? this._cursorOverride : auto;
   }
 
   // ---- input -------------------------------------------------------------------------------------
@@ -806,7 +814,7 @@ export class Chart {
       });
       ax.el.addEventListener('dblclick', () => { if (this.model.options.handleScale.axisDoubleClickReset.price) { ax.scale.setAutoScale(true); this._invalidate('full'); } });
       ax.el.addEventListener('wheel', (e) => { e.preventDefault(); const rect = ax.el.getBoundingClientRect(); ax.scale.scaleAround(e.clientY - rect.top, e.deltaY < 0 ? 0.9 : 1.1); this._invalidate('full'); }, { passive: false });
-      ax.el.addEventListener('contextmenu', (e) => { e.preventDefault(); const rect = ax.el.getBoundingClientRect(); this.events.emit('contextMenu', { x: e.clientX - rect.left, y: e.clientY - rect.top, paneId: r.pane.id, target: 'priceAxis' }); });
+      ax.el.addEventListener('contextmenu', (e) => { e.preventDefault(); const rect = ax.el.getBoundingClientRect(); this.events.emit('contextMenu', { x: e.clientX - rect.left, y: e.clientY - rect.top, paneId: r.pane.id, target: 'priceAxis', side }); });
     }
   }
 
@@ -1084,6 +1092,22 @@ export class Chart {
     if (this.drawings.onKeyDown(e)) { e.preventDefault(); return; }
     const ts = this.model.timeScale;
     const mod = isMac() ? e.metaKey : e.ctrlKey;
+    // Letter shortcuts use e.code so Alt/Option combos work on macOS (Option+letter yields symbols in e.key)
+    if (e.altKey && !mod) {
+      const tool: Record<string, string> = { KeyH: 'horizontal_line', KeyT: 'trend_line', KeyV: 'vertical_line', KeyF: 'fib_retracement', KeyJ: 'cross_line', KeyC: 'parallel_channel' };
+      const ps = this.model.mainPane.right;
+      switch (e.code) {
+        case 'KeyR': this.resetView(); e.preventDefault(); return;
+        case 'KeyI': ps.setInverted(!ps.inverted); this._invalidate('full'); e.preventDefault(); return;
+        case 'KeyL': ps.setMode(ps.mode === 'logarithmic' ? 'normal' : 'logarithmic'); this._invalidate('full'); e.preventDefault(); return;
+        case 'KeyP': ps.setMode(ps.mode === 'percentage' ? 'normal' : 'percentage'); this._invalidate('full'); e.preventDefault(); return;
+        case 'KeyA': this.model.resetPriceScales(); e.preventDefault(); return;
+        default:
+          if (tool[e.code]) { this.setTool(tool[e.code]); e.preventDefault(); return; }
+      }
+    }
+    if (mod && e.code === 'KeyK') { this.events.emit('openDialog', { type: 'symbolSearch' }); e.preventDefault(); return; }
+    if (mod && e.code === 'Comma') { this.events.emit('openDialog', { type: 'chartSettings' }); e.preventDefault(); return; }
     switch (e.key) {
       case 'ArrowLeft': ts.scrollBy(e.shiftKey ? ts.width / 2 : ts.barSpacing * 5); e.preventDefault(); break;
       case 'ArrowRight': ts.scrollBy(e.shiftKey ? -ts.width / 2 : -ts.barSpacing * 5); e.preventDefault(); break;
@@ -1091,20 +1115,7 @@ export class Chart {
       case '-': case '_': ts.zoom(0.8, ts.width / 2); e.preventDefault(); break;
       case 'Home': ts.fitContent(); e.preventDefault(); break;
       case 'End': ts.scrollToRealtime(); e.preventDefault(); break;
-      case 'r': case 'R': if (e.altKey) { this.resetView(); e.preventDefault(); } break;
-      case 'i': case 'I': if (e.altKey) { this.model.mainPane.right.setInverted(!this.model.mainPane.right.inverted); this._invalidate('full'); e.preventDefault(); } break;
-      case 'l': case 'L': if (e.altKey) { const ps = this.model.mainPane.right; ps.setMode(ps.mode === 'logarithmic' ? 'normal' : 'logarithmic'); this._invalidate('full'); e.preventDefault(); } break;
-      case 'p': case 'P': if (e.altKey) { const ps = this.model.mainPane.right; ps.setMode(ps.mode === 'percentage' ? 'normal' : 'percentage'); this._invalidate('full'); e.preventDefault(); } break;
-      case 'a': case 'A': if (e.altKey) { this.model.resetPriceScales(); e.preventDefault(); } break;
-      case 'h': case 'H': if (e.altKey) { this.setTool('horizontal_line'); e.preventDefault(); } break;
-      case 't': case 'T': if (e.altKey) { this.setTool('trend_line'); e.preventDefault(); } break;
-      case 'v': case 'V': if (e.altKey) { this.setTool('vertical_line'); e.preventDefault(); } break;
-      case 'f': case 'F': if (e.altKey) { this.setTool('fib_retracement'); e.preventDefault(); } break;
-      case 'j': case 'J': if (e.altKey) { this.setTool('cross_line'); e.preventDefault(); } break;
-      case 'c': case 'C': if (e.altKey) { this.setTool('parallel_channel'); e.preventDefault(); } break;
-      case 'k': case 'K': if (mod) { this.events.emit('openDialog', { type: 'symbolSearch' }); e.preventDefault(); } break;
       case '/': this.events.emit('openDialog', { type: 'indicators' }); e.preventDefault(); break;
-      case ',': if (mod) { this.events.emit('openDialog', { type: 'chartSettings' }); e.preventDefault(); } break;
       case 'Escape': this.events.emit('openDialog', { type: 'closeAll' }); break;
     }
   }

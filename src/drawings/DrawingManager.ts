@@ -53,6 +53,9 @@ export class DrawingManager {
   private _undo: string[] = [];
   private _redo: string[] = [];
   private _clipboard: SerializedDrawing | null = null;
+  get clipboard(): SerializedDrawing | null { return this._clipboard; }
+  /** Copy the selected drawing to the internal clipboard (Ctrl/Cmd+C). */
+  copySelected(): boolean { if (!this.selected) return false; this._clipboard = this.selected.serialize(); return true; }
   private _lastPointer: PointerInfo | null = null;
   private _pressPos: { x: number; y: number } | null = null;
   private _moved = false;

@@ -46,15 +46,13 @@ export function stopEvent(e: Event): void {
   e.stopPropagation();
 }
 
-let styleInjected = false;
 export function injectStyle(css: string, id = 'openchart-style'): void {
   if (typeof document === 'undefined') return;
-  if (styleInjected || document.getElementById(id)) return;
+  if (document.getElementById(id)) return;
   const style = document.createElement('style');
   style.id = id;
   style.textContent = css;
   document.head.appendChild(style);
-  styleInjected = true;
 }
 
 /** Position a floating element near an anchor, keeping it inside the viewport/container. */
