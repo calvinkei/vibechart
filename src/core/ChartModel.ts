@@ -11,6 +11,9 @@ import type { Bar, SeriesType, SymbolInfo, ResolutionString } from '../data/type
 import { Delegate } from '../util/events';
 import { resolveTimezone } from '../util/time';
 import { parseResolution } from '../data/resolution';
+import { SessionCalendar } from '../data/session';
+import { CompareSeries, type CompareStyle } from '../series/CompareSeries';
+import type { Datafeed } from '../data/types';
 
 export interface CrosshairState {
   visible: boolean;
@@ -42,6 +45,9 @@ export class ChartModel {
   resolution: ResolutionString = '1D';
   symbolInfo: SymbolInfo | null = null;
   timezone = 'Etc/UTC';
+  calendar: SessionCalendar | null = null;
+  compares: CompareSeries[] = [];
+  readonly comparesChanged = new Delegate<void>();
 
   readonly invalidated = new Delegate<InvalidateLevel>();
   readonly indicatorsChanged = new Delegate<void>();
@@ -98,6 +104,9 @@ export class ChartModel {
         if (ps.id === 'volume') ps.overlayMargins = { top: o.volume.scaleMargins.top, bottom: o.volume.scaleMargins.bottom };
       }
     }
+    this._applyPrecision();
+    this.mainPane.right.setPriceFormat(this.mainSeries.priceFormat);
+    for (const ind of this.indicators) if (ind.def.precision === 'inherit' || ind.def.precision === undefined) ind.priceFormat = this.mainSeries.priceFormat;
     this.mainSeries.rebuild(false, { prepended: 0, appended: 0, reset: false });
     this.volume.onDataChanged();
     this.optionsChanged.fire(o);
@@ -110,9 +119,39 @@ export class ChartModel {
     this.mainSeries.setSymbolInfo(info);
     this.timezone = resolveTimezone(this.options.symbol.timezone, info?.timezone);
     this.timeScale.setTimezone(this.timezone);
+    this._applyPrecision();
     this.mainPane.right.setPriceFormat(this.mainSeries.priceFormat);
     for (const ind of this.indicators) if (ind.def.precision === 'inherit' || ind.def.precision === undefined) ind.priceFormat = this.mainSeries.priceFormat;
+    this.calendar = info ? new SessionCalendar(info.session, info.timezone || 'Etc/UTC') : null;
+    this._wireCalendar();
     this.invalidate('full');
+  }
+
+  private _applyPrecision(): void {
+    const p = this.options.symbol.precision;
+    if (typeof p === 'number' && p >= 0) {
+      this.mainSeries.priceFormat = { ...this.mainSeries.priceFormat, precision: p, minMove: 1 };
+    } else if (this.symbolInfo) {
+      this.mainSeries.setSymbolInfo(this.symbolInfo);
+    }
+  }
+
+  private _wireCalendar(): void {
+    const cal = this.calendar;
+    if (!cal) { this.timeScale.setFutureTimeProvider(null, null); return; }
+    const self = this;
+    this.timeScale.setFutureTimeProvider(
+      (last, ahead) => cal.futureTime(last, ahead, self.resolution),
+      (first, back) => cal.pastTime(first, back, self.resolution),
+    );
+  }
+
+  /** Seconds until the current (last) bar closes, or null. */
+  barCloseCountdown(now = Date.now() / 1000): number | null {
+    const last = this.mainSeries.rawBars[this.mainSeries.rawBars.length - 1];
+    if (!last) return null;
+    const next = this.calendar ? this.calendar.nextBarTime(last.time, this.resolution) : last.time + this.resolutionSeconds();
+    return Math.max(0, next - now);
   }
 
   setTimezone(tz: string): void {
@@ -125,6 +164,7 @@ export class ChartModel {
   setResolution(res: ResolutionString): void {
     this.resolution = res;
     this.timeScale.setResolution(res);
+    this._wireCalendar();
     this.invalidate('full');
   }
 
@@ -139,6 +179,7 @@ export class ChartModel {
     this.volume.onDataChanged();
     this._indicatorCtx = null;
     this.recomputeIndicators();
+    for (const c of this.compares) c.setMainTimes(times);
     this.dataChanged.fire();
     this.invalidate('full');
   }
@@ -275,6 +316,44 @@ export class ChartModel {
     return this.indicators.map((i) => i.serialize());
   }
 
+  // ---- compare symbols ----------------------------------------------------------
+  addCompare(datafeed: Datafeed, symbol: string, opts: { style?: Partial<CompareStyle>; scale?: 'percent' | 'sameScale' | 'newScale' | 'newPane'; id?: string } = {}): CompareSeries {
+    const cs = new CompareSeries(datafeed, symbol, opts.style, opts.id);
+    const mode = opts.scale ?? 'percent';
+    let pane: Pane = this.mainPane;
+    if (mode === 'newPane') { pane = this.addPane(); cs.priceScaleId = 'right'; }
+    else if (mode === 'newScale') { cs.priceScaleId = cs.id; const ps = pane.getPriceScale(cs.id); ps.position = 'overlay'; ps.overlayMargins = { top: 0.1, bottom: 0.1 }; }
+    else {
+      cs.priceScaleId = 'right';
+      if (mode === 'percent') this.mainPane.right.setMode('percentage');
+    }
+    this.compares.push(cs);
+    pane.addSource(cs);
+    cs.changed.subscribe(() => this.invalidate('full'));
+    cs.setMainTimes(this.mainSeries.bars.map((b) => b.time));
+    void cs.load(this.resolution, Math.max(300, this.mainSeries.bars.length));
+    this.comparesChanged.fire();
+    this.invalidate('layout');
+    return cs;
+  }
+
+  removeCompare(cs: CompareSeries): void {
+    const pane = this.paneOf(cs);
+    pane?.removeSource(cs);
+    const i = this.compares.indexOf(cs);
+    if (i >= 0) this.compares.splice(i, 1);
+    cs.destroy();
+    this.pruneEmptyPanes();
+    if (this.compares.length === 0 && this.mainPane.right.mode === 'percentage') this.mainPane.right.setMode('normal');
+    this.comparesChanged.fire();
+    this.invalidate('layout');
+  }
+
+  /** Reload compare symbols after a resolution change. */
+  reloadCompares(): void {
+    for (const c of this.compares) void c.load(this.resolution, Math.max(300, this.mainSeries.bars.length));
+  }
+
   // ---- scales ------------------------------------------------------------------
   priceScaleFor(src: DataSource): PriceScale | null {
     const pane = this.paneOf(src);
@@ -325,5 +404,7 @@ export class ChartModel {
   destroy(): void {
     for (const ind of this.indicators) ind.destroy();
     this.indicators = [];
+    for (const c of this.compares) c.destroy();
+    this.compares = [];
   }
 }

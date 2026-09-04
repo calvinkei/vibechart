@@ -291,6 +291,11 @@ export class PaneView {
     }
     for (const src of this.pane.sources) {
       if (!(src instanceof IndicatorInstance)) {
+        if (m.compares.includes(src as any)) {
+          const items = src.legendItems(idx);
+          parts.push(`<div class="oc-legend-row${src.visible ? '' : ' oc-legend-hidden'}" data-source="${src.id}"><span class="oc-legend-title">${esc(src.title)}</span><span class="oc-legend-values">${items.map((it) => `<span class="oc-legend-value" style="color:${it.color ?? ''}">${esc(it.value)}</span>`).join('')}</span>${this._buttons(src.id, src.visible)}</div>`);
+          continue;
+        }
         if (src === m.volume && this.pane.isMain && m.options.volume.visible && o.showIndicatorTitles) {
           const items = o.showIndicatorValues ? src.legendItems(idx) : [];
           parts.push(`<div class="oc-legend-row" data-source="${src.id}"><span class="oc-legend-title">Volume${m.options.volume.showMA ? ` <span class="oc-legend-args">(${m.options.volume.maLength})</span>` : ''}</span><span class="oc-legend-values">${items.map((it) => `<span class="oc-legend-value" style="color:${it.color ?? ''}">${esc(it.value)}</span>`).join('')}</span>${this._buttons(src.id, src.visible)}</div>`);
@@ -313,7 +318,7 @@ export class PaneView {
           e.stopPropagation();
           const row = btn.closest('[data-source]') as HTMLElement | null;
           const sid = row?.dataset.source;
-          const source = sid === 'main' ? m.mainSeries : sid === 'volume' ? m.volume : m.indicators.find((i) => i.id === sid);
+          const source = sid === 'main' ? m.mainSeries : sid === 'volume' ? m.volume : (m.indicators.find((i) => i.id === sid) ?? m.compares.find((c) => c.id === sid));
           this.host.onLegendAction(btn.dataset.action as any, source, e as MouseEvent);
         });
       });
@@ -337,6 +342,14 @@ export class PaneView {
     this.top.destroy();
     this.el.remove();
   }
+}
+
+function formatCountdown(sec: number): string {
+  const s = Math.floor(sec);
+  const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60;
+  const p = (n: number) => (n < 10 ? `0${n}` : `${n}`);
+  if (d > 0) return `${d}d ${p(h)}:${p(m)}:${p(ss)}`;
+  return `${p(h)}:${p(m)}:${p(ss)}`;
 }
 
 function esc(s: string): string {
@@ -425,7 +438,16 @@ export class PriceAxisView {
       ctx.fillText(t.label, tx, t.y);
     }
     // source labels (last values)
-    const labels: Array<{ y: number; text: string; bg: string; color: string }> = [];
+    const labels: Array<{ y: number; text: string; bg: string; color: string; sub?: string }> = [];
+    // high/low labels of the visible range (main pane only)
+    if (this.pane.isMain && o.symbol.highLowLabelsVisible && ps === this.pane.mainScale) {
+      const vb = m.timeScale.visibleBars();
+      const r = vb ? m.mainSeries.priceRange(vb.from, vb.to) : null;
+      if (r) {
+        labels.push({ y: ps.priceToY(r.max), text: ps.formatPrice(r.max), bg: '#787B86', color: '#FFFFFF' });
+        labels.push({ y: ps.priceToY(r.min), text: ps.formatPrice(r.min), bg: '#787B86', color: '#FFFFFF' });
+      }
+    }
     for (const src of this.pane.sources) {
       if (!src.visible) continue;
       const srcScale = this.pane.getPriceScale(src.priceScaleId);
@@ -436,7 +458,12 @@ export class PriceAxisView {
       for (const lab of src.axisLabels()) {
         const y = srcScale.priceToY(lab.price);
         if (y < -10 || y > h + 10) continue;
-        labels.push({ y, text: lab.text || srcScale.formatPrice(lab.price), bg: lab.bg, color: lab.color || contrastText(lab.bg) });
+        let sub: string | undefined;
+        if (src === m.mainSeries && o.symbol.countdownVisible && ps === this.pane.mainScale) {
+          const cd = m.barCloseCountdown();
+          if (cd !== null && cd < 400 * 86400) sub = formatCountdown(cd);
+        }
+        labels.push({ y, text: lab.text || srcScale.formatPrice(lab.price), bg: lab.bg, color: lab.color || contrastText(lab.bg), sub });
       }
     }
     // avoid overlaps: sort by y and push apart
@@ -447,7 +474,7 @@ export class PriceAxisView {
         if (labels[i].y - labels[i - 1].y < boxH) labels[i].y = labels[i - 1].y + boxH;
       }
     }
-    for (const lab of labels) this._drawLabel(ctx, lab.y, lab.text, lab.bg, lab.color);
+    for (const lab of labels) this._drawLabel(ctx, lab.y, lab.text, lab.bg, lab.color, lab.sub);
     // crosshair label
     const ch = m.crosshair;
     if (ch.visible && ch.paneId === this.pane.id && o.crosshair.horzLine.labelVisible && o.crosshair.mode !== 'hidden') {
@@ -456,25 +483,27 @@ export class PriceAxisView {
     }
   }
 
-  private _drawLabel(ctx: CanvasRenderingContext2D, y: number, text: string, bg: string, color: string): void {
+  private _drawLabel(ctx: CanvasRenderingContext2D, y: number, text: string, bg: string, color: string, sub?: string): void {
     const o = this.host.model.options;
     const right = this.side === 'right';
-    const boxH = o.layout.fontSize + 6;
-    const yy = Math.round(y - boxH / 2);
+    const lineH = o.layout.fontSize + 6;
+    const boxH = sub ? lineH * 2 - 2 : lineH;
+    const yy = Math.round(y - lineH / 2);
     ctx.save();
     ctx.font = this.host.font;
-    const tw = ctx.measureText(text).width;
+    const tw = Math.max(ctx.measureText(text).width, sub ? ctx.measureText(sub).width : 0);
     const bw = Math.max(this.width - 1, tw + 12);
     const x = right ? 1 : this.width - bw - 1;
     ctx.fillStyle = bg;
     ctx.fillRect(x, yy, bw, boxH);
-    // pointer notch
-    ctx.beginPath();
-    if (right) { ctx.moveTo(1, y); ctx.lineTo(-4, y); }
     ctx.fillStyle = color;
     ctx.textBaseline = 'middle';
     ctx.textAlign = right ? 'left' : 'right';
     ctx.fillText(text, right ? 8 : this.width - 8, y + 0.5);
+    if (sub) {
+      ctx.font = this.host.font.replace(/(\d+)px/, (_m, n) => `${Math.max(9, +n - 1)}px`);
+      ctx.fillText(sub, right ? 8 : this.width - 8, y + lineH - 2);
+    }
     ctx.restore();
   }
 

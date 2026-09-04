@@ -53,7 +53,7 @@ function boxSizeFor(bars: Bar[], method: 'ATR' | 'Traditional', atrLength: numbe
 export function renko(bars: Bar[], st: RenkoStyleOptions, minMove: number): SyntheticBar[] {
   const out: SyntheticBar[] = [];
   if (bars.length === 0) return out;
-  const box = boxSizeFor(bars, st.boxSizeMethod, st.boxSize, st.atrLength, minMove);
+  const box = boxSizeFor(bars, st.boxSizeMethod, st.atrLength, st.boxSize, minMove);
   if (!(box > 0)) return out;
   const useHL = st.source === 'highLow';
   // start: first close aligned to box

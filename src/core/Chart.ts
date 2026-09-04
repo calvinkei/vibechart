@@ -16,6 +16,8 @@ import { el, getDpr, injectStyle, isMac } from '../util/dom';
 import { clamp } from '../util/math';
 import { SampleDatafeed } from '../data/SampleDatafeed';
 import baseCss from '../ui/styles.css?inline';
+import { ReplayController, type ReplayState } from './Replay';
+import type { CompareSeries, CompareStyle } from '../series/CompareSeries';
 
 export interface ChartConstructorOptions extends Omit<DeepPartial<ChartOptions>, 'symbol'> {
   /** Symbol settings tab overrides (ChartOptions.symbol) */
@@ -67,6 +69,9 @@ export interface ChartEvents extends Record<string, unknown> {
   openDialog: { type: string; payload?: unknown };
   optionsChanged: ChartOptions;
   toolChanged: string | null;
+  replayChanged: ReplayState;
+  compareAdded: CompareSeries;
+  compareRemoved: CompareSeries;
 }
 
 interface PaneRow {
@@ -125,6 +130,8 @@ export class Chart {
   private _needsLayout = true;
   private _hoveredPaneId: string | null = null;
   private _initialBars = 300;
+  private _countdownTimer = 0;
+  private _replay: ReplayController | null = null;
 
   constructor(opts: ChartConstructorOptions) {
     const container = typeof opts.container === 'string' ? document.querySelector<HTMLElement>(opts.container) : opts.container;
@@ -174,6 +181,10 @@ export class Chart {
     this._bindInput();
     this._syncPanes();
     this._observeResize();
+    this._countdownTimer = window.setInterval(() => {
+      if (this._destroyed) return;
+      if (this.model.options.symbol.countdownVisible && this.model.bars.length && !this._drag) this._invalidate('cursor');
+    }, 1000);
 
     if (chartType !== undefined) this.setChartType(chartType);
     if (savedData) this.load(savedData);
@@ -236,6 +247,7 @@ export class Chart {
     const l = this.loader;
     l.symbolResolved.subscribe((info) => { this.model.setSymbolInfo(info); this.events.emit('symbolChanged', info); });
     l.barsUpdated.subscribe((change) => {
+      if (this._replay?.active) { this._replay.onRealtimeBars(l.bars); return; }
       this.model.setBars(l.bars, change);
       if (change.reset) this._afterInitialLoad();
       this.events.emit('dataLoaded', { bars: l.bars.length });
@@ -283,7 +295,31 @@ export class Chart {
     this._interval = normalizeResolution(interval);
     this.model.setResolution(this._interval);
     this.events.emit('intervalChanged', this._interval);
+    this.model.reloadCompares();
     return this._loadSymbol(this._symbol, this._interval);
+  }
+
+  // ---- compare symbols -----------------------------------------------------------------
+  addCompareSymbol(symbol: string, opts: { style?: Partial<CompareStyle>; scale?: 'percent' | 'sameScale' | 'newScale' | 'newPane' } = {}): CompareSeries {
+    const cs = this.model.addCompare(this.datafeed, symbol, opts);
+    this.events.emit('compareAdded', cs);
+    return cs;
+  }
+  removeCompareSymbol(cs: CompareSeries | string): void {
+    const c = typeof cs === 'string' ? this.model.compares.find((x) => x.symbol === cs || x.id === cs) : cs;
+    if (!c) return;
+    this.model.removeCompare(c);
+    this.events.emit('compareRemoved', c);
+  }
+  getCompareSymbols(): CompareSeries[] { return this.model.compares.slice(); }
+
+  // ---- bar replay ------------------------------------------------------------------------
+  replay(): ReplayController {
+    if (!this._replay) {
+      this._replay = new ReplayController(this.model, () => this.loader.bars, (bars) => this.model.setBars(bars, { prepended: 0, appended: 0, reset: false }));
+      this._replay.changed.subscribe((s) => this.events.emit('replayChanged', s));
+    }
+    return this._replay;
   }
 
   setChartType(type: SeriesType | number): void {
@@ -492,9 +528,11 @@ export class Chart {
     if (this._destroyed) return;
     this._destroyed = true;
     this._resizeObserver?.disconnect();
+    clearInterval(this._countdownTimer);
     cancelAnimationFrame(this._raf);
     cancelAnimationFrame(this._kineticRaf);
     this._ui?.destroy();
+    this._replay?.destroy();
     this.loader.destroy();
     this.model.destroy();
     for (const r of this._rows) { r.view.destroy(); r.left.destroy(); r.right.destroy(); r.row.remove(); r.separator?.remove(); }
@@ -1046,6 +1084,7 @@ export class Chart {
         break;
       case 'remove':
         if (source instanceof IndicatorInstance) this.removeIndicator(source);
+        else if (m.compares.includes(source as any)) this.removeCompareSymbol(source as any);
         else if (source === m.volume) { m.options.volume.visible = false; m.volume.visible = false; this._invalidate('full'); }
         break;
       case 'settings':

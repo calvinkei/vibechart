@@ -69,7 +69,7 @@ export function samplePrice(sym: SampleSymbol, time: number): number {
 
 function inSession(sym: SampleSymbol, time: number, res: ReturnType<typeof parseResolution>): boolean {
   if (sym.session === '24x7') return true;
-  const p = dateParts(time, sym.timezone);
+  const p = dateParts(res.isIntraday ? time : time + 43200, res.isIntraday ? sym.timezone : 'Etc/UTC');
   if (sym.session === '24x5') {
     if (!res.isIntraday) return p.weekday >= 1 && p.weekday <= 5;
     // Sunday 22:00 -> Friday 22:00 UTC approx
