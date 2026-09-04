@@ -65,6 +65,9 @@ export interface FibLevel {
 
 export type HitTarget = { type: 'point'; index: number } | { type: 'body'; part?: string } | null;
 
+/** Scales handed to creation/drag callbacks (optional for backwards compatibility). */
+export interface ScaleContext { timeScale: TimeScale; priceScale: PriceScale | null; paneHeight: number; paneWidth: number }
+
 export interface SerializedDrawing {
   id: string;
   type: string;
@@ -142,13 +145,13 @@ export abstract class Drawing {
   abstract render(rc: DrawingRenderContext): void;
 
   /** Called during creation for each click; return true when creation is complete. */
-  addPoint(p: DrawingPoint): boolean {
+  addPoint(p: DrawingPoint, _sc?: ScaleContext): boolean {
     this.points.push(p);
     return this.points.length >= this.requiredPoints;
   }
 
   /** Update the last (pending) point during creation mouse-move preview. */
-  updatePendingPoint(p: DrawingPoint): void {
+  updatePendingPoint(p: DrawingPoint, _sc?: ScaleContext): void {
     if (this.points.length === 0) return;
     this.points[this.points.length - 1] = p;
   }
@@ -175,7 +178,7 @@ export abstract class Drawing {
   }
 
   /** Move a single point (drag handle). */
-  movePoint(index: number, p: DrawingPoint): void {
+  movePoint(index: number, p: DrawingPoint, _sc?: ScaleContext): void {
     if (this.points[index]) this.points[index] = p;
   }
 

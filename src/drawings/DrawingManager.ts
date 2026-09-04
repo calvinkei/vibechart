@@ -1,6 +1,6 @@
 import type { ChartModel } from '../core/ChartModel';
 import type { Pane } from '../core/Pane';
-import { Drawing, getDrawingTool, deserializeDrawing, type DrawingPoint, type DrawingRenderContext, type HitTarget, type SerializedDrawing } from './Drawing';
+import { Drawing, getDrawingTool, deserializeDrawing, type DrawingPoint, type DrawingRenderContext, type HitTarget, type SerializedDrawing, type ScaleContext, type DrawingCtor } from './Drawing';
 import { Delegate } from '../util/events';
 import type { PriceScale } from '../core/PriceScale';
 
@@ -94,6 +94,11 @@ export class DrawingManager {
       }
     }
     return { time, price };
+  }
+
+  scaleContext(paneId: string): ScaleContext {
+    const pane = this._pane(paneId);
+    return { timeScale: this.model.timeScale, priceScale: pane ? pane.mainScale : null, paneHeight: pane?.height ?? 0, paneWidth: this.model.timeScale.width };
   }
 
   renderContext(ctx: CanvasRenderingContext2D, paneId: string, width: number, height: number, dpr: number, font: string, drawing: Drawing | null, creating = false): DrawingRenderContext | null {
@@ -244,11 +249,11 @@ export class DrawingManager {
     if (!ctor) { this.setTool(null); return false; }
     const point = this.pointAt(p.x, p.y, p.paneId, true);
     if (!this.creating) {
-      const d = new ctor(this._defaultStyleFor());
+      const d = new ctor(this._defaultStyleFor(ctor));
       d.creating = true;
       d.paneId = p.paneId;
       this.creating = d;
-      const done = d.addPoint(point);
+      const done = d.addPoint(point, this.scaleContext(p.paneId));
       if (ctor.pointsCount === 0) {
         // freehand: keep adding points on move until mouse up
         this._freehandActive = true;
@@ -256,22 +261,39 @@ export class DrawingManager {
       }
       if (done) { this._finishCreation(); return true; }
       // add a pending point that follows the mouse
-      d.addPoint({ ...point });
+      d.addPoint({ ...point }, this.scaleContext(p.paneId));
       this.model.invalidate('cursor');
       return true;
     }
     // subsequent click confirms the pending point
     const d = this.creating;
-    d.updatePendingPoint(this._constrained(point, p));
+    d.updatePendingPoint(this._constrained(point, p), this.scaleContext(p.paneId));
     if (d.isComplete()) { this._finishCreation(); return true; }
-    d.addPoint({ ...point });
+    d.addPoint({ ...point }, this.scaleContext(p.paneId));
     this.model.invalidate('cursor');
     return true;
   }
 
-  private _defaultStyleFor(): Record<string, any> {
+  /**
+   * Style overrides applied to new drawings: only the chart-level defaults the user changed from the
+   * built-in defaults (so every tool keeps its TradingView colours), plus saved per-tool templates.
+   */
+  private _defaultStyleFor(ctor: DrawingCtor): Record<string, any> {
     const o = this.model.options.drawing;
-    return { lineColor: o.defaultLineColor, lineWidth: o.defaultLineWidth, textColor: o.defaultTextColor };
+    const out: Record<string, any> = {};
+    const probe = new ctor().defaultStyle();
+    if (o.defaultLineColor !== '#2962FF' && 'lineColor' in probe) out.lineColor = o.defaultLineColor;
+    if (o.defaultLineWidth !== 2 && 'lineWidth' in probe) out.lineWidth = o.defaultLineWidth;
+    if (o.defaultTextColor !== '#2962FF' && 'textColor' in probe) out.textColor = o.defaultTextColor;
+    const tpl = this.templates.get(ctor.toolId);
+    if (tpl) Object.assign(out, tpl);
+    return out;
+  }
+
+  /** Per-tool default style templates (toolId -> style patch). */
+  readonly templates = new Map<string, Record<string, any>>();
+  setTemplate(toolId: string, style: Record<string, any> | null): void {
+    if (style) this.templates.set(toolId, { ...style }); else this.templates.delete(toolId);
   }
 
   /** Shift-constrain the pending point to 45° increments relative to the previous point. */
@@ -297,9 +319,9 @@ export class DrawingManager {
     if (this.creating) {
       const d = this.creating;
       if (this._freehandActive) {
-        d.addPoint(this.pointAt(p.x, p.y, p.paneId, false));
+        d.addPoint(this.pointAt(p.x, p.y, p.paneId, false), this.scaleContext(p.paneId));
       } else {
-        d.updatePendingPoint(this._constrained(this.pointAt(p.x, p.y, p.paneId, true), p));
+        d.updatePendingPoint(this._constrained(this.pointAt(p.x, p.y, p.paneId, true), p), this.scaleContext(p.paneId));
       }
       this.model.invalidate('cursor');
       return true;
@@ -307,7 +329,7 @@ export class DrawingManager {
     if (this._drag) {
       const dr = this._drag;
       if (dr.kind === 'point') {
-        dr.drawing.movePoint(dr.index, this.pointAt(p.x, p.y, dr.drawing.paneId, true));
+        dr.drawing.movePoint(dr.index, this.pointAt(p.x, p.y, dr.drawing.paneId, true), this.scaleContext(dr.drawing.paneId));
       } else {
         const ts = this.model.timeScale;
         const pt = this.pointAt(p.x, p.y, dr.drawing.paneId, false);
