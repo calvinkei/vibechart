@@ -1,0 +1,34 @@
+{
+  "name": "openchart",
+  "version": "0.1.0",
+  "description": "Open-source, dependency-free TradingView-style charting library in pure JavaScript/TypeScript (Canvas 2D). Chart types, drawing tools, technical indicators, lazy loading, multi-pane, themes.",
+  "type": "module",
+  "main": "./dist/openchart.umd.js",
+  "module": "./dist/openchart.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/openchart.js",
+      "require": "./dist/openchart.umd.js"
+    },
+    "./style.css": "./dist/openchart.css"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p tsconfig.json --noEmit && vite build && tsc -p tsconfig.types.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "preview": "vite preview"
+  },
+  "keywords": ["chart", "charting", "trading", "candlestick", "tradingview", "canvas", "technical-analysis", "indicators", "drawing-tools", "finance"],
+  "license": "MIT",
+  "sideEffects": ["**/*.css"],
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "vite": "^6.0.0",
+    "vitest": "^3.0.0"
+  }
+}

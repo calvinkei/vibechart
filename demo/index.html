@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OpenChart demo</title>
+  <style>
+    html, body { margin: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Trebuchet MS', Roboto, sans-serif; background: #f0f3fa; }
+    #app { display: flex; flex-direction: column; height: 100%; }
+    #controls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 8px; background: #fff; border-bottom: 1px solid #e0e3eb; font-size: 12px; }
+    #controls select, #controls button, #controls input { font: inherit; height: 26px; }
+    #chart { flex: 1 1 auto; min-height: 0; }
+    .dark { background: #131722; }
+    .dark #controls { background: #1e222d; color: #d1d4dc; border-color: #2a2e39; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="controls">
+      <label>Symbol <select id="symbol"></select></label>
+      <label>Interval <select id="interval"></select></label>
+      <label>Type <select id="type"></select></label>
+      <label>Indicator <select id="indicator"></select></label>
+      <button id="addInd">Add</button>
+      <label>Tool <select id="tool"><option value="">cursor</option></select></label>
+      <button id="theme">Toggle theme</button>
+      <button id="log">Log</button>
+      <button id="pct">%</button>
+      <button id="reset">Reset</button>
+      <button id="shot">Screenshot</button>
+      <button id="save">Save</button>
+      <button id="load">Load</button>
+      <span id="status"></span>
+    </div>
+    <div id="chart"></div>
+  </div>
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>
