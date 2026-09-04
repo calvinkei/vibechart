@@ -9,6 +9,7 @@ const chart = new Chart({
   datafeed,
   symbol: live ? 'BTCUSDT' : 'BTCUSD',
   interval: '60',
+  initialBars: Math.min(50000, parseInt(params.get('bars') || '300', 10) || 300), // ?bars=20000 for stress testing
   theme: 'light',
   studies: ['Moving Average Exponential', 'Volume'],
 });
