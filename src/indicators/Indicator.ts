@@ -532,8 +532,9 @@ export class IndicatorInstance extends DataSource {
     if (this.error) return [{ value: 'error', color: '#F23645' }];
     for (const p of this.def.plots) {
       const st = this.styles[p.id];
-      if (!st || p.hideInLegend || st.type === 'bgcolor' || st.type === 'none' || st.type === 'shapes' || st.type === 'chars') continue;
+      if (!st || !st.visible || p.hideInLegend || st.type === 'bgcolor' || st.type === 'none' || st.type === 'shapes' || st.type === 'chars') continue;
       const vals = this.results[p.id]?.values;
+      if (!vals) continue;
       const i = index - (st.offset ?? 0);
       const v = vals ? vals[i] : NaN;
       items.push({ value: v === v && v !== undefined ? this.formatValue(v) : '∅', color: this.results[p.id]?.colors?.[i] ?? st.color, label: this.def.plots.length > 1 ? p.title : undefined });

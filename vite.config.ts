@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
 
 export default defineConfig(({ command }) => ({
-  root: command === 'serve' ? 'demo' : '.',
+  root: command === 'serve' && !process.env.VITEST ? 'demo' : '.',
   resolve: { alias: { '@': resolve(__dirname, 'src') } },
   server: { port: 5180, open: false },
   build: {
