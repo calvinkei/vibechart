@@ -13,7 +13,7 @@ export default defineConfig(({ command }) => ({
       fileName: (format) =>
         format === 'es' ? 'vibechart.mjs' : format === 'cjs' ? 'vibechart.cjs' : 'vibechart.umd.js',
     },
-    sourcemap: true,
+    sourcemap: false,
     minify: 'esbuild',
     cssCodeSplit: false,
     rollupOptions: { output: { assetFileNames: 'vibechart.[ext]' } },
