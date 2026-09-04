@@ -1,10 +1,13 @@
 import { Chart, SampleDatafeed, listIndicators, listDrawingTools, DEFAULT_INTERVALS, parseResolution, type SeriesType } from '../src/index';
+import { BinanceDatafeed } from './binanceDatafeed';
 
-const datafeed = new SampleDatafeed();
+const params = new URLSearchParams(location.search);
+const live = params.get('feed') === 'binance';
+const datafeed = live ? new BinanceDatafeed() : new SampleDatafeed();
 const chart = new Chart({
   container: '#chart',
   datafeed,
-  symbol: 'BTCUSD',
+  symbol: live ? 'BTCUSDT' : 'BTCUSD',
   interval: '60',
   theme: 'light',
   studies: ['Moving Average Exponential', 'Volume'],
@@ -13,8 +16,9 @@ const chart = new Chart({
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const symbolSel = $<HTMLSelectElement>('symbol');
-for (const s of SampleDatafeed.symbols()) symbolSel.appendChild(new Option(`${s.name} — ${s.description}`, s.name));
-symbolSel.value = 'BTCUSD';
+if (live) for (const s of ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'XRPUSDT']) symbolSel.appendChild(new Option(s, s));
+else for (const s of SampleDatafeed.symbols()) symbolSel.appendChild(new Option(`${s.name} — ${s.description}`, s.name));
+symbolSel.value = live ? 'BTCUSDT' : 'BTCUSD';
 symbolSel.onchange = () => chart.setSymbol(symbolSel.value);
 
 const intervalSel = $<HTMLSelectElement>('interval');
@@ -45,6 +49,11 @@ $('shot').onclick = () => { const url = chart.takeScreenshot(); const w = window
 let saved: any = null;
 $('save').onclick = () => { saved = chart.save(); localStorage.setItem('oc-demo', JSON.stringify(saved)); $('status').textContent = 'saved'; };
 $('load').onclick = () => { const s = saved ?? JSON.parse(localStorage.getItem('oc-demo') || 'null'); if (s) chart.load(s); };
+
+const feedBtn = document.createElement('button');
+feedBtn.textContent = live ? 'Use sample data' : 'Use live Binance data';
+feedBtn.onclick = () => { location.search = live ? '' : '?feed=binance'; };
+$('controls').appendChild(feedBtn);
 
 chart.subscribe('dataLoaded', ({ bars }) => { $('status').textContent = `${bars} bars`; });
 chart.subscribe('error', (e) => { $('status').textContent = `error: ${e}`; });
