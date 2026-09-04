@@ -254,6 +254,7 @@ export class Chart {
       this._maybeLoadMore();
     });
     l.loadingChanged.subscribe((v) => { this.events.emit('loading', v); this._invalidate('light'); });
+    l.marksUpdated.subscribe(() => this.model.setMarks(Array.from(l.marks.values()), Array.from(l.timescaleMarks.values())));
     l.error.subscribe((e) => this.events.emit('error', e));
   }
 
@@ -264,7 +265,19 @@ export class Chart {
     this.events.emit('ready', undefined);
   }
 
+  private _marksTimer = 0;
+  private _requestMarks(): void {
+    clearTimeout(this._marksTimer);
+    this._marksTimer = window.setTimeout(() => {
+      const tr = this.model.timeScale.visibleTimeRange();
+      if (!tr) return;
+      const span = Math.max(1, tr.to - tr.from);
+      this.loader.requestMarks(Math.floor(tr.from - span), Math.ceil(tr.to + span));
+    }, 150);
+  }
+
   private _maybeLoadMore(): void {
+    this._requestMarks();
     const ts = this.model.timeScale;
     if (ts.length === 0) return;
     const r = ts.visibleLogicalRange();
@@ -726,6 +739,21 @@ export class Chart {
     ta.addEventListener('wheel', (e) => { e.preventDefault(); this.model.timeScale.zoom(e.deltaY < 0 ? 1.1 : 0.9, this._width / 2); }, { passive: false });
     ta.addEventListener('contextmenu', (e) => { e.preventDefault(); const r = ta.getBoundingClientRect(); this.events.emit('contextMenu', { x: e.clientX - r.left, y: e.clientY - r.top, paneId: null, target: 'timeAxis' }); });
     ta.style.cursor = 'ew-resize';
+    ta.addEventListener('mousemove', (e) => {
+      const r = ta.getBoundingClientRect();
+      const x = e.clientX - r.left;
+      const ts = this.model.timeScale;
+      let found: typeof this.model.hoveredTimescaleMark = null;
+      for (const mk of this.model.timescaleMarks) {
+        if (Math.abs(ts.timeToX(mk.time) - x) <= 8) { found = mk; break; }
+      }
+      if (found !== this.model.hoveredTimescaleMark) {
+        this.model.hoveredTimescaleMark = found;
+        this._showMarkTooltip(found, e.clientX - this.chartAreaEl.getBoundingClientRect().left, r.top - this.chartAreaEl.getBoundingClientRect().top);
+        this._invalidate('cursor');
+      }
+    });
+    ta.addEventListener('mouseleave', () => { if (this.model.hoveredTimescaleMark) { this.model.hoveredTimescaleMark = null; this._showMarkTooltip(null, 0, 0); this._invalidate('cursor'); } });
     area.addEventListener('mouseleave', () => { if (!this._drag) { this.model.clearCrosshair(); this._hoveredPaneId = null; } });
     area.addEventListener('wheel', (e) => this._onWheel(e), { passive: false });
     // touch
@@ -1029,6 +1057,15 @@ export class Chart {
       }
       this._invalidate('full');
     }
+  }
+
+  private _markTip: HTMLDivElement | null = null;
+  private _showMarkTooltip(mark: { tooltip: string[]; label: string } | null, x: number, y: number): void {
+    if (!mark) { this._markTip?.remove(); this._markTip = null; return; }
+    if (!this._markTip) { this._markTip = el('div', { class: 'oc-tooltip' }); this.chartAreaEl.appendChild(this._markTip); }
+    this._markTip.innerHTML = mark.tooltip.map((t) => `<div>${t.replace(/</g, '&lt;')}</div>`).join('');
+    this._markTip.style.left = `${Math.max(0, x - 60)}px`;
+    this._markTip.style.top = `${y - 8 - this._markTip.offsetHeight - 24}px`;
   }
 
   private _updateCrosshair(x: number, y: number, paneId: string): void {

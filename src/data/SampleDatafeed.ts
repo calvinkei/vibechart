@@ -233,6 +233,32 @@ export class SampleDatafeed implements Datafeed {
     if (id !== undefined) { clearInterval(id); this._subs.delete(guid); }
   }
 
+  getMarks(symbolInfo: SymbolInfo, from: number, to: number, onData: (marks: import('./types').Mark[]) => void, _resolution: ResolutionString): void {
+    // sample: a mark every ~20 trading days on stocks (earnings-like), every 30 days on others
+    const out: import('./types').Mark[] = [];
+    const step = symbolInfo.type === 'stock' ? 28 * 86400 : 30 * 86400;
+    let t = Math.ceil(from / step) * step;
+    let k = 0;
+    while (t <= to && k++ < 200) {
+      out.push({ id: `m_${symbolInfo.name}_${t}`, time: t, color: k % 2 ? 'red' : 'blue', text: `Sample mark at ${new Date(t * 1000).toDateString()}`, label: k % 2 ? 'D' : 'A', labelFontColor: '#fff', minSize: 14 });
+      t += step;
+    }
+    setTimeout(() => onData(out), this.latency);
+  }
+
+  getTimescaleMarks(symbolInfo: SymbolInfo, from: number, to: number, onData: (marks: import('./types').TimescaleMark[]) => void, _resolution: ResolutionString): void {
+    const out: import('./types').TimescaleMark[] = [];
+    if (symbolInfo.type !== 'stock') return void setTimeout(() => onData(out), this.latency);
+    const step = 91 * 86400; // quarterly earnings
+    let t = Math.ceil(from / step) * step;
+    let k = 0;
+    while (t <= to && k++ < 100) {
+      out.push({ id: `e_${symbolInfo.name}_${t}`, time: t, color: k % 2 ? '#089981' : '#F23645', label: 'E', tooltip: [`${symbolInfo.name} earnings`, new Date(t * 1000).toDateString(), 'EPS: sample'], shape: k % 2 ? 'earningUp' : 'earningDown' });
+      t += step;
+    }
+    setTimeout(() => onData(out), this.latency);
+  }
+
   getServerTime(cb: (t: number) => void): void { cb(Math.floor(Date.now() / 1000)); }
 
   static symbols(): SampleSymbol[] { return SYMBOLS; }

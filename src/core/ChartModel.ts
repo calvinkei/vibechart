@@ -7,7 +7,7 @@ import type { DataSource } from '../series/Series';
 import { IndicatorInstance, buildIndicatorContext, getIndicator, type IndicatorContext, type IndicatorDefinition, type SerializedIndicator } from '../indicators/Indicator';
 import type { ChartOptions, ThemeName } from './options';
 import { applyTheme, cloneDeep, mergeOptions, type DeepPartial } from './options';
-import type { Bar, SeriesType, SymbolInfo, ResolutionString } from '../data/types';
+import type { Bar, SeriesType, SymbolInfo, ResolutionString, Mark, TimescaleMark } from '../data/types';
 import { Delegate } from '../util/events';
 import { resolveTimezone } from '../util/time';
 import { parseResolution } from '../data/resolution';
@@ -47,6 +47,10 @@ export class ChartModel {
   timezone = 'Etc/UTC';
   calendar: SessionCalendar | null = null;
   compares: CompareSeries[] = [];
+  marks: Mark[] = [];
+  timescaleMarks: TimescaleMark[] = [];
+  /** hovered timescale mark (for tooltip) */
+  hoveredTimescaleMark: TimescaleMark | null = null;
   readonly comparesChanged = new Delegate<void>();
 
   readonly invalidated = new Delegate<InvalidateLevel>();
@@ -389,6 +393,12 @@ export class ChartModel {
 
   invalidate(level: InvalidateLevel = 'full'): void {
     this.invalidated.fire(level);
+  }
+
+  setMarks(marks: Mark[], tsMarks: TimescaleMark[]): void {
+    this.marks = marks.slice().sort((a, b) => a.time - b.time);
+    this.timescaleMarks = tsMarks.slice().sort((a, b) => a.time - b.time);
+    this.invalidate('full');
   }
 
   /** Index used for legend values: crosshair bar or last bar. */

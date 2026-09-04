@@ -188,12 +188,42 @@ export class PaneView {
         ctx.restore();
       }
     }
+    // bar marks (datafeed getMarks)
+    if (this.pane.isMain && m.marks.length && o.timeScale.marksVisible) this._renderBarMarks(ctx);
     // drawings
     ctx.save();
     ctx.beginPath();
     ctx.rect(0, 0, w, h);
     ctx.clip();
     this.host.drawings.renderPane(ctx, this.pane.id, w, h, dpr, this.host.font);
+    ctx.restore();
+  }
+
+  private _renderBarMarks(ctx: CanvasRenderingContext2D): void {
+    const m = this.host.model;
+    const ts = m.timeScale;
+    const tr = ts.visibleTimeRange();
+    if (!tr) return;
+    ctx.save();
+    ctx.font = `bold 10px ${m.options.layout.fontFamily}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const r = Math.max(6, Math.min(14, ts.barSpacing * 0.9));
+    const y = this.height - r - 4;
+    for (const mk of m.marks) {
+      if (mk.time < tr.from || mk.time > tr.to) continue;
+      const x = ts.timeToX(mk.time);
+      const bg = typeof mk.color === 'string' ? mk.color : mk.color.background;
+      const border = typeof mk.color === 'string' ? mk.color : mk.color.border;
+      ctx.beginPath();
+      ctx.arc(x, y, Math.max(r, (mk.minSize || 0) / 2), 0, Math.PI * 2);
+      ctx.fillStyle = bg;
+      ctx.fill();
+      ctx.lineWidth = mk.borderWidth ?? 1;
+      ctx.strokeStyle = border;
+      ctx.stroke();
+      if (mk.label && r >= 7) { ctx.fillStyle = mk.labelFontColor || '#fff'; ctx.fillText(mk.label, x, y + 0.5); }
+    }
     ctx.restore();
   }
 
@@ -563,6 +593,33 @@ export class TimeAxisView {
       ctx.font = bold ? this.host.font.replace('normal', '600') : this.host.font;
       ctx.fillStyle = o.timeScale.textColor;
       ctx.fillText(t.label, t.x, h / 2 + 1);
+    }
+    // timescale marks (earnings, dividends, splits...)
+    if (m.timescaleMarks.length && o.timeScale.marksVisible) {
+      const tr = ts.visibleTimeRange();
+      if (tr) {
+        ctx.save();
+        ctx.font = `bold 9px ${o.layout.fontFamily}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        for (const mk of m.timescaleMarks) {
+          if (mk.time < tr.from || mk.time > tr.to) continue;
+          const x = ts.timeToX(mk.time);
+          const hovered = mk === m.hoveredTimescaleMark;
+          const rr = hovered ? 8 : 6.5;
+          ctx.beginPath();
+          if (mk.shape === 'earningUp') { ctx.moveTo(x, h - 4 - rr * 2); ctx.lineTo(x + rr, h - 4); ctx.lineTo(x - rr, h - 4); ctx.closePath(); }
+          else if (mk.shape === 'earningDown') { ctx.moveTo(x, h - 4); ctx.lineTo(x + rr, h - 4 - rr * 2); ctx.lineTo(x - rr, h - 4 - rr * 2); ctx.closePath(); }
+          else ctx.arc(x, h - 4 - rr, rr, 0, Math.PI * 2);
+          ctx.fillStyle = o.layout.background.color;
+          ctx.fill();
+          ctx.lineWidth = hovered ? 2 : 1.5;
+          ctx.strokeStyle = mk.color;
+          ctx.stroke();
+          if (mk.label) { ctx.fillStyle = mk.color; ctx.fillText(mk.label.slice(0, 1), x, h - 4 - rr + 0.5); }
+        }
+        ctx.restore();
+      }
     }
     // crosshair label
     const ch = m.crosshair;

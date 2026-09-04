@@ -1,4 +1,4 @@
-import type { Bar, Datafeed, DatafeedConfiguration, ResolutionString, SymbolInfo, HistoryMetadata } from './types';
+import type { Bar, Datafeed, DatafeedConfiguration, ResolutionString, SymbolInfo, HistoryMetadata, Mark, TimescaleMark } from './types';
 import { parseResolution } from './resolution';
 import { Delegate } from '../util/events';
 import { uid } from '../util/math';
@@ -16,6 +16,10 @@ export class DataLoader {
   readonly error = new Delegate<string>();
   readonly loadingChanged = new Delegate<boolean>();
   readonly ready = new Delegate<DatafeedConfiguration>();
+  readonly marksUpdated = new Delegate<void>();
+  marks = new Map<string | number, Mark>();
+  timescaleMarks = new Map<string | number, TimescaleMark>();
+  private _marksRanges: Array<[number, number]> = [];
 
   bars: Bar[] = [];
   symbolInfo: SymbolInfo | null = null;
@@ -73,6 +77,9 @@ export class DataLoader {
     this.noMoreHistory = false;
     this._nextTime = null;
     this._pendingMore = false;
+    this.marks.clear();
+    this.timescaleMarks.clear();
+    this._marksRanges = [];
     this.barsUpdated.fire({ prepended: 0, appended: 0, reset: true });
     this._setLoading(true);
     const info = await new Promise<SymbolInfo | null>((resolve) => {
@@ -227,6 +234,37 @@ export class DataLoader {
       if (idx >= 0) { this.bars[idx] = bar; this.barsUpdated.fire({ prepended: 0, appended: 0, reset: false }); }
     }
     this.tick.fire(bar);
+  }
+
+  /** Fetch bar marks / timescale marks for a time range (seconds) if the datafeed supports them. */
+  requestMarks(from: number, to: number): void {
+    if (!this.symbolInfo || !this.config) return;
+    const supportsMarks = !!this.config.supports_marks && !!this.datafeed.getMarks;
+    const supportsTs = !!this.config.supports_timescale_marks && !!this.datafeed.getTimescaleMarks;
+    if (!supportsMarks && !supportsTs) return;
+    // skip ranges already covered
+    if (this._marksRanges.some(([a, b]) => a <= from && b >= to)) return;
+    this._marksRanges.push([from, to]);
+    const gen = this._generation;
+    const res = this.resolution;
+    if (supportsMarks) {
+      try {
+        this.datafeed.getMarks!(this.symbolInfo, from, to, (marks) => {
+          if (gen !== this._generation) return;
+          for (const m of marks) this.marks.set(m.id, { ...m, time: normalizeTime(m.time) });
+          this.marksUpdated.fire();
+        }, res);
+      } catch (e) { console.error('[openchart] getMarks threw', e); }
+    }
+    if (supportsTs) {
+      try {
+        this.datafeed.getTimescaleMarks!(this.symbolInfo, from, to, (marks) => {
+          if (gen !== this._generation) return;
+          for (const m of marks) this.timescaleMarks.set(m.id, { ...m, time: normalizeTime(m.time) });
+          this.marksUpdated.fire();
+        }, res);
+      } catch (e) { console.error('[openchart] getTimescaleMarks threw', e); }
+    }
   }
 
   /** True when the loader may load more history to the left. */
