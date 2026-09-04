@@ -52,32 +52,32 @@ export function openTemplates(chart: Chart): Dialog {
     const body = dlg.body;
     body.innerHTML = '';
     body.appendChild(formSection('Save current indicators as template'));
-    const save = el('div', { class: 'oc-tpl-save' });
+    const save = el('div', { class: 'vc-tpl-save' });
     const nameInput = textInput(name, (v) => { name = v; }, { placeholder: 'Template name' });
     nameInput.addEventListener('keydown', (e: Event) => { if ((e as KeyboardEvent).key === 'Enter') doSave(); });
     save.appendChild(nameInput);
-    save.appendChild(button('Save', { className: 'oc-secondary', onClick: () => doSave() }));
+    save.appendChild(button('Save', { className: 'vc-secondary', onClick: () => doSave() }));
     body.appendChild(save);
     body.appendChild(note(`${chart.model.indicators.length} indicator${chart.model.indicators.length === 1 ? '' : 's'} on the chart now. Saving an existing name overwrites it.`));
 
     body.appendChild(formSection('Default templates'));
     for (const p of PRESETS) {
       const available = p.items.filter((it) => getIndicator(it.def));
-      const row = el('div', { class: 'oc-tpl-row' });
-      row.appendChild(el('span', { class: 'oc-tpl-name', text: p.name }));
-      row.appendChild(el('span', { class: 'oc-tpl-meta', text: p.items.length ? `${available.length}/${p.items.length}` : '' }));
-      row.appendChild(button('Apply', { className: 'oc-secondary', onClick: () => { applyIndicatorTemplate(chart, available.map((it) => ({ id: '', def: it.def, inputs: it.inputs ?? {}, styles: {}, bands: {}, fills: {}, visible: true, paneId: '', priceScaleId: 'right' }))); render(); } }));
+      const row = el('div', { class: 'vc-tpl-row' });
+      row.appendChild(el('span', { class: 'vc-tpl-name', text: p.name }));
+      row.appendChild(el('span', { class: 'vc-tpl-meta', text: p.items.length ? `${available.length}/${p.items.length}` : '' }));
+      row.appendChild(button('Apply', { className: 'vc-secondary', onClick: () => { applyIndicatorTemplate(chart, available.map((it) => ({ id: '', def: it.def, inputs: it.inputs ?? {}, styles: {}, bands: {}, fills: {}, visible: true, paneId: '', priceScaleId: 'right' }))); render(); } }));
       body.appendChild(row);
     }
 
     body.appendChild(formSection('My templates'));
     const list = loadTemplates();
-    if (!list.length) body.appendChild(el('div', { class: 'oc-tree-empty', text: 'No saved templates yet.' }));
+    if (!list.length) body.appendChild(el('div', { class: 'vc-tree-empty', text: 'No saved templates yet.' }));
     for (const t of list) {
-      const row = el('div', { class: 'oc-tpl-row' });
-      row.appendChild(el('span', { class: 'oc-tpl-name', text: t.name, title: t.indicators.map((i) => i.def).join(', ') }));
-      row.appendChild(el('span', { class: 'oc-tpl-meta', text: `${t.indicators.length} ind.` }));
-      row.appendChild(button('Apply', { className: 'oc-secondary', onClick: () => { applyIndicatorTemplate(chart, t.indicators); render(); } }));
+      const row = el('div', { class: 'vc-tpl-row' });
+      row.appendChild(el('span', { class: 'vc-tpl-name', text: t.name, title: t.indicators.map((i) => i.def).join(', ') }));
+      row.appendChild(el('span', { class: 'vc-tpl-meta', text: `${t.indicators.length} ind.` }));
+      row.appendChild(button('Apply', { className: 'vc-secondary', onClick: () => { applyIndicatorTemplate(chart, t.indicators); render(); } }));
       row.appendChild(button('', { icon: 'trash', title: 'Delete', onClick: () => { saveTemplates(loadTemplates().filter((x) => x.name !== t.name)); render(); } }));
       body.appendChild(row);
     }

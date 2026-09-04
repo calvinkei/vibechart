@@ -8,14 +8,15 @@ export default defineConfig(({ command }) => ({
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
-      name: 'OpenChart',
-      formats: ['es', 'umd'],
-      fileName: (format) => (format === 'es' ? 'openchart.js' : 'openchart.umd.js'),
+      name: 'VibeChart',
+      formats: ['es', 'cjs', 'umd'],
+      fileName: (format) =>
+        format === 'es' ? 'vibechart.mjs' : format === 'cjs' ? 'vibechart.cjs' : 'vibechart.umd.js',
     },
     sourcemap: true,
     minify: 'esbuild',
     cssCodeSplit: false,
-    rollupOptions: { output: { assetFileNames: 'openchart.[ext]' } },
+    rollupOptions: { output: { assetFileNames: 'vibechart.[ext]' } },
   },
   test: { environment: 'node', include: ['test/**/*.test.ts'] },
 }));

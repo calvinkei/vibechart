@@ -48,8 +48,8 @@ export function shiftKey(): string { return isMac() ? '⇧' : 'Shift'; }
 let toastTimer = 0;
 /** Small transient message at the bottom of the chart root. */
 export function toast(root: HTMLElement, text: string, ms = 2500): void {
-  root.querySelector('.oc-toast')?.remove();
-  const t = el('div', { class: 'oc-toast', text });
+  root.querySelector('.vc-toast')?.remove();
+  const t = el('div', { class: 'vc-toast', text });
   root.appendChild(t);
   clearTimeout(toastTimer);
   toastTimer = window.setTimeout(() => t.remove(), ms);
@@ -64,14 +64,14 @@ export function confirmDialog(container: HTMLElement, title: string, message: st
       title,
       container,
       width: 380,
-      className: 'oc-confirm',
+      className: 'vc-confirm',
       buttons: [
         { label: 'Cancel', onClick: (d) => { finish(false); d.close(); } },
         { label: okLabel, primary: true, onClick: (d) => { finish(true); d.close(); } },
       ],
       onClose: () => finish(false),
     });
-    dlg.body.appendChild(el('div', { class: 'oc-confirm-text', text: message }));
+    dlg.body.appendChild(el('div', { class: 'vc-confirm-text', text: message }));
   });
 }
 
@@ -88,21 +88,21 @@ export function timezoneMenuItems(chart: Chart): MenuItem[] {
 
 /** A menu row element: [check] [icon] label [shortcut] [★]. Used for rows that need a favourite star. */
 export function menuRow(opts: { label: string; icon?: string; checked?: boolean; shortcut?: string; star?: { active: boolean; onToggle: (active: boolean) => void } }): HTMLElement {
-  const row = el('span', { class: 'oc-menu-row' });
-  if (opts.checked !== undefined) row.appendChild(el('span', { class: 'oc-check', text: opts.checked ? '✓' : '' }));
+  const row = el('span', { class: 'vc-menu-row' });
+  if (opts.checked !== undefined) row.appendChild(el('span', { class: 'vc-check', text: opts.checked ? '✓' : '' }));
   if (opts.icon) {
     const svg = ICONS[opts.icon] ?? (opts.icon.startsWith('<svg') ? opts.icon : '');
-    if (svg) row.appendChild(el('span', { class: 'oc-icon', style: 'width:18px;height:18px', html: svg }));
+    if (svg) row.appendChild(el('span', { class: 'vc-icon', style: 'width:18px;height:18px', html: svg }));
   }
-  row.appendChild(el('span', { class: 'oc-menu-label', text: opts.label }));
-  if (opts.shortcut) row.appendChild(el('span', { class: 'oc-shortcut', text: opts.shortcut }));
+  row.appendChild(el('span', { class: 'vc-menu-label', text: opts.label }));
+  if (opts.shortcut) row.appendChild(el('span', { class: 'vc-shortcut', text: opts.shortcut }));
   if (opts.star) {
     let active = opts.star.active;
-    const star = el('span', { class: `oc-fav ${active ? 'oc-active' : ''}`, html: ICONS[active ? 'starFilled' : 'star'], title: active ? 'Remove from favorites' : 'Add to favorites' });
+    const star = el('span', { class: `vc-fav ${active ? 'vc-active' : ''}`, html: ICONS[active ? 'starFilled' : 'star'], title: active ? 'Remove from favorites' : 'Add to favorites' });
     star.addEventListener('click', (e) => {
       e.stopPropagation();
       active = !active;
-      star.classList.toggle('oc-active', active);
+      star.classList.toggle('vc-active', active);
       star.innerHTML = ICONS[active ? 'starFilled' : 'star'];
       opts.star!.onToggle(active);
     });

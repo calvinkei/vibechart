@@ -11,25 +11,25 @@ import { debounce } from './helpers';
 export type SymbolSearchMode = 'symbol' | 'compare';
 
 export function openSymbolSearch(chart: Chart, mode: SymbolSearchMode = 'symbol'): Dialog {
-  const dlg = new Dialog({ title: mode === 'compare' ? 'Compare symbol' : 'Symbol Search', container: chart.root, width: 620, className: 'oc-sym-dialog' });
+  const dlg = new Dialog({ title: mode === 'compare' ? 'Compare symbol' : 'Symbol Search', container: chart.root, width: 620, className: 'vc-sym-dialog' });
   let exchange = '';
   let symbolType = '';
   let results: SearchSymbolResultItem[] = [];
   let highlight = 0;
   const canSearch = typeof chart.datafeed.searchSymbols === 'function';
 
-  const searchWrap = el('div', { class: 'oc-dlg-search' });
-  searchWrap.appendChild(el('span', { class: 'oc-icon', html: ICONS.search }));
-  const input = el('input', { class: 'oc-search-input', type: 'text', placeholder: mode === 'compare' ? 'Add symbol to compare' : 'Search symbol', autocomplete: 'off', spellcheck: false });
+  const searchWrap = el('div', { class: 'vc-dlg-search' });
+  searchWrap.appendChild(el('span', { class: 'vc-icon', html: ICONS.search }));
+  const input = el('input', { class: 'vc-search-input', type: 'text', placeholder: mode === 'compare' ? 'Add symbol to compare' : 'Search symbol', autocomplete: 'off', spellcheck: false });
   input.style.textTransform = 'uppercase';
   searchWrap.appendChild(input);
   dlg.body.appendChild(searchWrap);
 
   if (mode === 'compare') {
-    const radios = el('div', { class: 'oc-sym-radios' });
+    const radios = el('div', { class: 'vc-sym-radios' });
     for (const [v, label] of [['percent', 'Same % scale'], ['scale', 'New price scale'], ['pane', 'New pane']]) {
       const lab = el('label');
-      const r = el('input', { type: 'radio', name: 'oc-compare-mode', value: v });
+      const r = el('input', { type: 'radio', name: 'vc-compare-mode', value: v });
       r.checked = v === 'percent';
       lab.appendChild(r);
       lab.appendChild(document.createTextNode(label));
@@ -38,16 +38,16 @@ export function openSymbolSearch(chart: Chart, mode: SymbolSearchMode = 'symbol'
     dlg.body.appendChild(radios);
   }
 
-  const filters = el('div', { class: 'oc-sym-filters' });
+  const filters = el('div', { class: 'vc-sym-filters' });
   const exchangeSel = selectInput('', [{ value: '', label: 'All exchanges' }], (v) => { exchange = v; runSearch(); });
   const typeSel = selectInput('', [{ value: '', label: 'All types' }], (v) => { symbolType = v; runSearch(); });
   filters.appendChild(typeSel);
   filters.appendChild(exchangeSel);
   dlg.body.appendChild(filters);
 
-  const list = el('div', { class: 'oc-sym-list' });
+  const list = el('div', { class: 'vc-sym-list' });
   dlg.body.appendChild(list);
-  const status = el('div', { class: 'oc-sym-status' });
+  const status = el('div', { class: 'vc-sym-status' });
   dlg.body.appendChild(status);
 
   const fillSelect = (sel: HTMLSelectElement, opts: Array<{ value: string; label: string }>) => {
@@ -69,14 +69,14 @@ export function openSymbolSearch(chart: Chart, mode: SymbolSearchMode = 'symbol'
   function renderList(): void {
     list.innerHTML = '';
     if (!results.length) {
-      list.appendChild(el('div', { class: 'oc-ind-empty', text: canSearch ? (input.value ? 'No symbols found' : 'Type to search') : 'Type a symbol and press Enter' }));
+      list.appendChild(el('div', { class: 'vc-ind-empty', text: canSearch ? (input.value ? 'No symbols found' : 'Type to search') : 'Type a symbol and press Enter' }));
       return;
     }
     if (highlight >= results.length) highlight = 0;
     results.forEach((it, i) => {
-      const row = el('div', { class: `oc-sym-row ${i === highlight ? 'oc-active' : ''}` });
-      row.innerHTML = `<span class="oc-sym-name">${escapeHtml(it.symbol)}</span><span class="oc-sym-desc">${escapeHtml(it.description ?? '')}</span><span class="oc-sym-type">${escapeHtml(it.type ?? '')}</span><span class="oc-sym-exch">${escapeHtml(it.exchange ?? '')}</span>`;
-      row.addEventListener('mouseenter', () => { highlight = i; list.querySelectorAll('.oc-sym-row').forEach((r) => r.classList.toggle('oc-active', r === row)); });
+      const row = el('div', { class: `vc-sym-row ${i === highlight ? 'vc-active' : ''}` });
+      row.innerHTML = `<span class="vc-sym-name">${escapeHtml(it.symbol)}</span><span class="vc-sym-desc">${escapeHtml(it.description ?? '')}</span><span class="vc-sym-type">${escapeHtml(it.type ?? '')}</span><span class="vc-sym-exch">${escapeHtml(it.exchange ?? '')}</span>`;
+      row.addEventListener('mouseenter', () => { highlight = i; list.querySelectorAll('.vc-sym-row').forEach((r) => r.classList.toggle('vc-active', r === row)); });
       row.addEventListener('click', () => choose(it));
       list.appendChild(row);
     });
@@ -120,7 +120,7 @@ export function openSymbolSearch(chart: Chart, mode: SymbolSearchMode = 'symbol'
       e.preventDefault();
       if (!results.length) return;
       highlight = (highlight + (e.key === 'ArrowDown' ? 1 : -1) + results.length) % results.length;
-      list.querySelectorAll('.oc-sym-row').forEach((r, i) => r.classList.toggle('oc-active', i === highlight));
+      list.querySelectorAll('.vc-sym-row').forEach((r, i) => r.classList.toggle('vc-active', i === highlight));
       (list.children[highlight] as HTMLElement | undefined)?.scrollIntoView({ block: 'nearest' });
     } else if (e.key === 'Escape') dlg.close();
     else e.stopPropagation();

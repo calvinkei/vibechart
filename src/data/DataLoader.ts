@@ -48,7 +48,7 @@ export class DataLoader {
           resolve(this.config);
         });
       } catch (e) {
-        console.error('[openchart] datafeed.onReady threw', e);
+        console.error('[vibechart] datafeed.onReady threw', e);
         this.config = {};
         resolve(this.config);
       }
@@ -193,7 +193,7 @@ export class DataLoader {
     try {
       this.datafeed.subscribeBars(this.symbolInfo, this.resolution, (bar) => this._onTick(bar), this._guid, () => this._resetCache());
     } catch (e) {
-      console.error('[openchart] subscribeBars threw', e);
+      console.error('[vibechart] subscribeBars threw', e);
     }
   }
 
@@ -254,7 +254,7 @@ export class DataLoader {
           for (const m of marks) this.marks.set(m.id, { ...m, time: normalizeTime(m.time) });
           this.marksUpdated.fire();
         }, res);
-      } catch (e) { console.error('[openchart] getMarks threw', e); }
+      } catch (e) { console.error('[vibechart] getMarks threw', e); }
     }
     if (supportsTs) {
       try {
@@ -263,7 +263,7 @@ export class DataLoader {
           for (const m of marks) this.timescaleMarks.set(m.id, { ...m, time: normalizeTime(m.time) });
           this.marksUpdated.fire();
         }, res);
-      } catch (e) { console.error('[openchart] getTimescaleMarks threw', e); }
+      } catch (e) { console.error('[vibechart] getTimescaleMarks threw', e); }
     }
   }
 

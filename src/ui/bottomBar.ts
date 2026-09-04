@@ -80,7 +80,7 @@ export function createBottomBar(chart: Chart): BottomBar {
   const mainScale = () => chart.model.mainPane.mainScale;
 
   function markRanges(): void {
-    for (const b of rangeBtns) b.classList.toggle('oc-active', b.textContent === activeRange);
+    for (const b of rangeBtns) b.classList.toggle('vc-active', b.textContent === activeRange);
   }
 
   async function applyRange(r: DateRange): Promise<void> {
@@ -111,9 +111,9 @@ export function createBottomBar(chart: Chart): BottomBar {
 
   function updateScaleButtons(): void {
     const ps = mainScale();
-    pctBtn?.classList.toggle('oc-active', ps.mode === 'percentage');
-    logBtn?.classList.toggle('oc-active', ps.mode === 'logarithmic');
-    autoBtn?.classList.toggle('oc-active', ps.isAutoScale);
+    pctBtn?.classList.toggle('vc-active', ps.mode === 'percentage');
+    logBtn?.classList.toggle('vc-active', ps.mode === 'logarithmic');
+    autoBtn?.classList.toggle('vc-active', ps.isAutoScale);
   }
 
   function bindScale(): void {
@@ -125,31 +125,31 @@ export function createBottomBar(chart: Chart): BottomBar {
     host.innerHTML = '';
     rangeBtns = [];
     const o = chart.options;
-    const left = el('div', { class: 'oc-bb-left' });
+    const left = el('div', { class: 'vc-bb-left' });
     if (o.navigation.dateRanges) {
       for (const r of DATE_RANGES) {
-        const b = el('button', { class: 'oc-range-btn', text: r.label, title: r.title });
+        const b = el('button', { class: 'vc-range-btn', text: r.label, title: r.title });
         b.addEventListener('click', () => { void applyRange(r); });
         rangeBtns.push(b);
         left.appendChild(b);
       }
-      const go = el('button', { class: 'oc-range-btn oc-goto-btn', html: ICONS.calendar, title: `Go to date (${altKey()}+G)` });
+      const go = el('button', { class: 'vc-range-btn vc-goto-btn', html: ICONS.calendar, title: `Go to date (${altKey()}+G)` });
       go.addEventListener('click', () => openDialog(chart, 'goToDate'));
       left.appendChild(go);
       markRanges();
     }
-    const right = el('div', { class: 'oc-bb-right' });
-    clockEl = el('button', { class: 'oc-range-btn oc-clock-btn', title: 'Time zone' });
+    const right = el('div', { class: 'vc-bb-right' });
+    clockEl = el('button', { class: 'vc-range-btn vc-clock-btn', title: 'Time zone' });
     if (o.navigation.timezoneMenu) dropdown(clockEl, root, () => timezoneMenuItems(chart), { align: 'right' });
     else clockEl.style.cursor = 'default';
     right.appendChild(clockEl);
-    right.appendChild(el('span', { class: 'oc-sep' }));
+    right.appendChild(el('span', { class: 'vc-sep' }));
     const toggle = (mode: 'percentage' | 'logarithmic') => () => { const ps = mainScale(); ps.setMode(ps.mode === mode ? 'normal' : mode); chart.requestRender('full'); };
-    pctBtn = el('button', { class: 'oc-range-btn oc-scale-btn', text: '%', title: `Toggle percentage scale (${altKey()}+P)` });
+    pctBtn = el('button', { class: 'vc-range-btn vc-scale-btn', text: '%', title: `Toggle percentage scale (${altKey()}+P)` });
     pctBtn.addEventListener('click', toggle('percentage'));
-    logBtn = el('button', { class: 'oc-range-btn oc-scale-btn', text: 'log', title: `Toggle logarithmic scale (${altKey()}+L)` });
+    logBtn = el('button', { class: 'vc-range-btn vc-scale-btn', text: 'log', title: `Toggle logarithmic scale (${altKey()}+L)` });
     logBtn.addEventListener('click', toggle('logarithmic'));
-    autoBtn = el('button', { class: 'oc-range-btn oc-scale-btn', text: 'auto', title: `Toggle auto scale (${altKey()}+A)` });
+    autoBtn = el('button', { class: 'vc-range-btn vc-scale-btn', text: 'auto', title: `Toggle auto scale (${altKey()}+A)` });
     autoBtn.addEventListener('click', () => { const ps = mainScale(); ps.setAutoScale(!ps.isAutoScale); chart.requestRender('full'); });
     right.appendChild(pctBtn);
     right.appendChild(logBtn);

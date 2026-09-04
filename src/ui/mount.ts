@@ -77,7 +77,7 @@ export function mountUI(chart: Chart): { destroy(): void } {
         openDialog(chart, 'closeAll');
         return;
       case 'replay': {
-        const existing = chart.chartAreaEl.querySelector<HTMLElement>('.oc-replay-bar');
+        const existing = chart.chartAreaEl.querySelector<HTMLElement>('.vc-replay-bar');
         if (existing) existing.querySelector<HTMLButtonElement>('button[title="Exit replay"]')?.click();
         else showReplayBar(chart);
         return;

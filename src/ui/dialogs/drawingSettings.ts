@@ -30,7 +30,7 @@ export function openDrawingSettings(chart: Chart, d: Drawing): Dialog {
     title: d.name || d.typeName,
     container: chart.root,
     width: 560,
-    className: 'oc-settings-dialog',
+    className: 'vc-settings-dialog',
     tabs,
     buttons: [
       { label: 'Template ▾', left: true, onClick: (dlg) => openTemplateMenu(dlg) },
@@ -43,7 +43,7 @@ export function openDrawingSettings(chart: Chart, d: Drawing): Dialog {
     const pane = dlg.tab(tab);
     pane.innerHTML = '';
     if (!list.length) { pane.appendChild(note('No options in this group.')); return; }
-    renderPropertyForm(pane, list, d.style, (key, value) => { changeStyle({ [key]: value }); pane.dispatchEvent(new Event('oc-change')); });
+    renderPropertyForm(pane, list, d.style, (key, value) => { changeStyle({ [key]: value }); pane.dispatchEvent(new Event('vc-change')); });
   }
 
   function renderCoordinates(): void {
@@ -73,15 +73,15 @@ export function openDrawingSettings(chart: Chart, d: Drawing): Dialog {
     const v = d.visibility;
     pane.appendChild(note('The drawing is shown only on the selected intervals.'));
     for (const b of VISIBILITY_BUCKETS) {
-      const row = el('div', { class: 'oc-vis-row' });
+      const row = el('div', { class: 'vc-vis-row' });
       row.appendChild(checkbox(!!v[b.key], (on) => { (v as any)[b.key] = on; notifyChanged(); }, b.label));
-      row.appendChild(el('span', { class: 'oc-vis-label' }));
+      row.appendChild(el('span', { class: 'vc-vis-label' }));
       row.appendChild(numberInput((v as any)[`${b.key}From`], (n) => { (v as any)[`${b.key}From`] = n; notifyChanged(); }, { min: b.min, max: b.max, int: true }));
-      row.appendChild(el('span', { class: 'oc-vis-dash', text: '–' }));
+      row.appendChild(el('span', { class: 'vc-vis-dash', text: '–' }));
       row.appendChild(numberInput((v as any)[`${b.key}To`], (n) => { (v as any)[`${b.key}To`] = n; notifyChanged(); }, { min: b.min, max: b.max, int: true }));
       pane.appendChild(row);
     }
-    const rr = el('div', { class: 'oc-vis-row' });
+    const rr = el('div', { class: 'vc-vis-row' });
     rr.appendChild(checkbox(v.ranges, (on) => { v.ranges = on; notifyChanged(); }, 'Ranges'));
     pane.appendChild(rr);
   }
@@ -100,7 +100,7 @@ export function openDrawingSettings(chart: Chart, d: Drawing): Dialog {
   }
 
   function openTemplateMenu(dialog: Dialog): void {
-    const btn = dialog.footer?.querySelector('button.oc-left') as HTMLElement | null;
+    const btn = dialog.footer?.querySelector('button.vc-left') as HTMLElement | null;
     const r = (btn ?? dialog.el).getBoundingClientRect();
     const c = chart.root.getBoundingClientRect();
     const key = drawingDefaultsKey(d.type);
@@ -110,7 +110,7 @@ export function openDrawingSettings(chart: Chart, d: Drawing): Dialog {
       { label: 'Apply defaults', disabled: !hasSaved, onClick: () => { const s = readJson<Record<string, unknown> | null>(key, null); if (s) { changeStyle(s); renderAll(); } } },
       { separator: true },
       { label: 'Reset to defaults', onClick: () => { removeJson(key); applyStyle(d.defaultStyle(), !undoPushed); undoPushed = true; d.visibility = defaultVisibility(); notifyChanged(); renderAll(); } },
-    ], { className: 'oc-dlg-menu', minWidth: 180 });
+    ], { className: 'vc-dlg-menu', minWidth: 180 });
     // the dialog's own mousedown handler stops propagation, so close the menu when the dialog is clicked
     const m = dialog.el;
     const onDown = () => { closeAllMenus(); m.removeEventListener('mousedown', onDown); };

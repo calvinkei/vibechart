@@ -31,8 +31,8 @@ export const MIN_PRICE_AXIS_WIDTH = 56;
 // ---------------------------------------------------------------------------------------------
 export class PaneView {
   readonly el: HTMLDivElement;
-  readonly main = new CanvasLayer('oc-canvas-main');
-  readonly top = new CanvasLayer('oc-canvas-top');
+  readonly main = new CanvasLayer('vc-canvas-main');
+  readonly top = new CanvasLayer('vc-canvas-top');
   readonly legendEl: HTMLDivElement;
   readonly buttonsEl: HTMLDivElement;
   width = 0;
@@ -40,19 +40,19 @@ export class PaneView {
   private _legendKey = '';
 
   constructor(readonly host: ViewHost, readonly pane: Pane) {
-    this.el = el('div', { class: 'oc-pane', 'data-pane': pane.id });
+    this.el = el('div', { class: 'vc-pane', 'data-pane': pane.id });
     this.el.appendChild(this.main.canvas);
     this.el.appendChild(this.top.canvas);
-    this.legendEl = el('div', { class: 'oc-legend' });
+    this.legendEl = el('div', { class: 'vc-legend' });
     this.el.appendChild(this.legendEl);
-    this.buttonsEl = el('div', { class: 'oc-pane-buttons' });
+    this.buttonsEl = el('div', { class: 'vc-pane-buttons' });
     this.el.appendChild(this.buttonsEl);
     this._buildPaneButtons();
   }
 
   private _buildPaneButtons(): void {
     const mk = (title: string, svg: string, action: 'up' | 'down' | 'collapse' | 'maximize' | 'remove') => {
-      const b = el('button', { class: 'oc-pane-btn', title, html: svg });
+      const b = el('button', { class: 'vc-pane-btn', title, html: svg });
       b.addEventListener('mousedown', (e) => e.stopPropagation());
       b.addEventListener('click', (e) => { e.stopPropagation(); this.host.onPaneAction(action, this.pane); });
       return b;
@@ -163,7 +163,7 @@ export class PaneView {
       ctx.beginPath();
       ctx.rect(0, 0, w, h);
       ctx.clip();
-      try { src.render(rc); } catch (e) { console.error('[openchart] render failed', e); }
+      try { src.render(rc); } catch (e) { console.error('[vibechart] render failed', e); }
       ctx.restore();
     }
     // price line of main series
@@ -313,29 +313,29 @@ export class PaneView {
     if (this.pane.isMain) {
       const info = m.symbolInfo;
       const res = parseResolution(m.resolution);
-      const title = `${o.showSymbol ? esc(info?.name ?? m.mainSeries.title ?? '') : ''}${o.showSymbolDescription && info?.description ? ` <span class="oc-legend-desc">${esc(info.description)}</span>` : ''}${o.showInterval ? ` <span class="oc-legend-int">${esc(res.label.toUpperCase())}</span>` : ''}${o.showExchange && info?.exchange ? ` <span class="oc-legend-exch">${esc(info.exchange)}</span>` : ''}`;
+      const title = `${o.showSymbol ? esc(info?.name ?? m.mainSeries.title ?? '') : ''}${o.showSymbolDescription && info?.description ? ` <span class="vc-legend-desc">${esc(info.description)}</span>` : ''}${o.showInterval ? ` <span class="vc-legend-int">${esc(res.label.toUpperCase())}</span>` : ''}${o.showExchange && info?.exchange ? ` <span class="vc-legend-exch">${esc(info.exchange)}</span>` : ''}`;
       const items = o.showOHLC || o.showBarChange || o.showVolume ? m.mainSeries.legendItems(idx).filter((it) => (it.label === 'Vol' ? o.showVolume : it.label ? o.showOHLC : o.showBarChange)) : [];
-      const loading = this.host.isLoading() ? '<span class="oc-legend-loading" title="Loading">⟳</span>' : '';
-      parts.push(`<div class="oc-legend-row oc-legend-main" data-source="main"><span class="oc-legend-title" data-action="symbol">${title}</span>${loading}<span class="oc-legend-values">${items.map((it) => `<span class="oc-legend-item">${it.label ? `<span class="oc-legend-label">${it.label}</span>` : ''}<span class="oc-legend-value" style="color:${it.color ?? ''}">${esc(it.value)}</span></span>`).join('')}</span>${this._buttons('main', m.mainSeries.visible)}</div>`);
+      const loading = this.host.isLoading() ? '<span class="vc-legend-loading" title="Loading">⟳</span>' : '';
+      parts.push(`<div class="vc-legend-row vc-legend-main" data-source="main"><span class="vc-legend-title" data-action="symbol">${title}</span>${loading}<span class="vc-legend-values">${items.map((it) => `<span class="vc-legend-item">${it.label ? `<span class="vc-legend-label">${it.label}</span>` : ''}<span class="vc-legend-value" style="color:${it.color ?? ''}">${esc(it.value)}</span></span>`).join('')}</span>${this._buttons('main', m.mainSeries.visible)}</div>`);
       if (m.options.volume.visible && !m.options.volume.overlay) { /* volume in a separate pane handled below */ }
     }
     for (const src of this.pane.sources) {
       if (!(src instanceof IndicatorInstance)) {
         if (m.compares.includes(src as any)) {
           const items = src.legendItems(idx);
-          parts.push(`<div class="oc-legend-row${src.visible ? '' : ' oc-legend-hidden'}" data-source="${src.id}"><span class="oc-legend-title">${esc(src.title)}</span><span class="oc-legend-values">${items.map((it) => `<span class="oc-legend-value" style="color:${it.color ?? ''}">${esc(it.value)}</span>`).join('')}</span>${this._buttons(src.id, src.visible)}</div>`);
+          parts.push(`<div class="vc-legend-row${src.visible ? '' : ' vc-legend-hidden'}" data-source="${src.id}"><span class="vc-legend-title">${esc(src.title)}</span><span class="vc-legend-values">${items.map((it) => `<span class="vc-legend-value" style="color:${it.color ?? ''}">${esc(it.value)}</span>`).join('')}</span>${this._buttons(src.id, src.visible)}</div>`);
           continue;
         }
         if (src === m.volume && this.pane.isMain && m.options.volume.visible && o.showIndicatorTitles) {
           const items = o.showIndicatorValues ? src.legendItems(idx) : [];
-          parts.push(`<div class="oc-legend-row" data-source="${src.id}"><span class="oc-legend-title">Volume${m.options.volume.showMA ? ` <span class="oc-legend-args">(${m.options.volume.maLength})</span>` : ''}</span><span class="oc-legend-values">${items.map((it) => `<span class="oc-legend-value" style="color:${it.color ?? ''}">${esc(it.value)}</span>`).join('')}</span>${this._buttons(src.id, src.visible)}</div>`);
+          parts.push(`<div class="vc-legend-row" data-source="${src.id}"><span class="vc-legend-title">Volume${m.options.volume.showMA ? ` <span class="vc-legend-args">(${m.options.volume.maLength})</span>` : ''}</span><span class="vc-legend-values">${items.map((it) => `<span class="vc-legend-value" style="color:${it.color ?? ''}">${esc(it.value)}</span>`).join('')}</span>${this._buttons(src.id, src.visible)}</div>`);
         }
         continue;
       }
       if (!o.showIndicatorTitles) continue;
       const items = o.showIndicatorValues ? src.legendItems(idx) : [];
       const title = o.showIndicatorArguments ? src.legendTitle(true) : src.def.shortName;
-      parts.push(`<div class="oc-legend-row${src.visible ? '' : ' oc-legend-hidden'}" data-source="${src.id}"><span class="oc-legend-title" title="${esc(src.def.name)}">${esc(title)}</span>${src.error ? `<span class="oc-legend-error" title="${esc(src.error)}">!</span>` : ''}<span class="oc-legend-values">${items.map((it) => `<span class="oc-legend-item">${it.label ? `<span class="oc-legend-label">${esc(it.label)}</span>` : ''}<span class="oc-legend-value" style="color:${it.color ?? ''}">${esc(it.value)}</span></span>`).join('')}</span>${this._buttons(src.id, src.visible)}</div>`);
+      parts.push(`<div class="vc-legend-row${src.visible ? '' : ' vc-legend-hidden'}" data-source="${src.id}"><span class="vc-legend-title" title="${esc(src.def.name)}">${esc(title)}</span>${src.error ? `<span class="vc-legend-error" title="${esc(src.error)}">!</span>` : ''}<span class="vc-legend-values">${items.map((it) => `<span class="vc-legend-item">${it.label ? `<span class="vc-legend-label">${esc(it.label)}</span>` : ''}<span class="vc-legend-value" style="color:${it.color ?? ''}">${esc(it.value)}</span></span>`).join('')}</span>${this._buttons(src.id, src.visible)}</div>`);
     }
     const html = parts.join('');
     if (html !== this._legendKey) {
@@ -359,11 +359,11 @@ export class PaneView {
     const eye = visible
       ? '<svg viewBox="0 0 18 18" width="16" height="16"><path fill="currentColor" d="M9 4C5.5 4 2.7 6.3 1.5 9c1.2 2.7 4 5 7.5 5s6.3-2.3 7.5-5C15.3 6.3 12.5 4 9 4zm0 8.3A3.3 3.3 0 1 1 9 5.7a3.3 3.3 0 0 1 0 6.6zM9 7.3a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4z"/></svg>'
       : '<svg viewBox="0 0 18 18" width="16" height="16"><path fill="currentColor" d="M2.5 2.5l13 13-1 1-2.6-2.6C10.9 14.6 10 14.8 9 14.8c-3.5 0-6.3-2.3-7.5-5.8.5-1.3 1.3-2.5 2.3-3.4L1.5 3.5l1-1zM9 3.2c3.5 0 6.3 2.3 7.5 5.8-.4 1.1-1 2-1.7 2.8l-1.4-1.4c.3-.4.6-.9.8-1.4C13.4 6.5 11.4 5.2 9 5.2c-.4 0-.8 0-1.2.1L6.2 3.7c.9-.3 1.8-.5 2.8-.5z"/></svg>';
-    return `<span class="oc-legend-buttons">
-      <button class="oc-legend-btn" data-action="hide" title="Hide">${eye}</button>
-      <button class="oc-legend-btn" data-action="settings" title="Settings"><svg viewBox="0 0 18 18" width="16" height="16"><path fill="currentColor" d="M9 6.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zm6.3 3.6l1.2.9-1.2 2.1-1.4-.5c-.4.4-.9.7-1.4.9l-.2 1.5H9.7l-.2-1.5c-.5-.2-1-.5-1.4-.9l-1.4.5-1.2-2.1 1.2-.9a4.9 4.9 0 0 1 0-1.7L5.5 7.5l1.2-2.1 1.4.5c.4-.4.9-.7 1.4-.9L9.7 3.5h2.6l.2 1.5c.5.2 1 .5 1.4.9l1.4-.5 1.2 2.1-1.2.9a4.9 4.9 0 0 1 0 1.7z"/></svg></button>
-      ${id !== 'main' ? `<button class="oc-legend-btn" data-action="remove" title="Remove"><svg viewBox="0 0 18 18" width="16" height="16"><path fill="currentColor" d="M5 4l8 8-1 1-8-8 1-1zm8 0l1 1-8 8-1-1 8-8z"/></svg></button>` : ''}
-      <button class="oc-legend-btn" data-action="moreMenu" title="More"><svg viewBox="0 0 18 18" width="16" height="16"><circle cx="4" cy="9" r="1.5" fill="currentColor"/><circle cx="9" cy="9" r="1.5" fill="currentColor"/><circle cx="14" cy="9" r="1.5" fill="currentColor"/></svg></button>
+    return `<span class="vc-legend-buttons">
+      <button class="vc-legend-btn" data-action="hide" title="Hide">${eye}</button>
+      <button class="vc-legend-btn" data-action="settings" title="Settings"><svg viewBox="0 0 18 18" width="16" height="16"><path fill="currentColor" d="M9 6.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zm6.3 3.6l1.2.9-1.2 2.1-1.4-.5c-.4.4-.9.7-1.4.9l-.2 1.5H9.7l-.2-1.5c-.5-.2-1-.5-1.4-.9l-1.4.5-1.2-2.1 1.2-.9a4.9 4.9 0 0 1 0-1.7L5.5 7.5l1.2-2.1 1.4.5c.4-.4.9-.7 1.4-.9L9.7 3.5h2.6l.2 1.5c.5.2 1 .5 1.4.9l1.4-.5 1.2 2.1-1.2.9a4.9 4.9 0 0 1 0 1.7z"/></svg></button>
+      ${id !== 'main' ? `<button class="vc-legend-btn" data-action="remove" title="Remove"><svg viewBox="0 0 18 18" width="16" height="16"><path fill="currentColor" d="M5 4l8 8-1 1-8-8 1-1zm8 0l1 1-8 8-1-1 8-8z"/></svg></button>` : ''}
+      <button class="vc-legend-btn" data-action="moreMenu" title="More"><svg viewBox="0 0 18 18" width="16" height="16"><circle cx="4" cy="9" r="1.5" fill="currentColor"/><circle cx="9" cy="9" r="1.5" fill="currentColor"/><circle cx="14" cy="9" r="1.5" fill="currentColor"/></svg></button>
     </span>`;
   }
 
@@ -391,12 +391,12 @@ function esc(s: string): string {
 // ---------------------------------------------------------------------------------------------
 export class PriceAxisView {
   readonly el: HTMLDivElement;
-  readonly layer = new CanvasLayer('oc-canvas-axis');
+  readonly layer = new CanvasLayer('vc-canvas-axis');
   width = 0;
   height = 0;
 
   constructor(readonly host: ViewHost, readonly pane: Pane, readonly side: 'left' | 'right') {
-    this.el = el('div', { class: `oc-price-axis oc-price-axis-${side}` });
+    this.el = el('div', { class: `vc-price-axis vc-price-axis-${side}` });
     this.el.appendChild(this.layer.canvas);
   }
 
@@ -545,12 +545,12 @@ export class PriceAxisView {
 // ---------------------------------------------------------------------------------------------
 export class TimeAxisView {
   readonly el: HTMLDivElement;
-  readonly layer = new CanvasLayer('oc-canvas-axis');
+  readonly layer = new CanvasLayer('vc-canvas-axis');
   width = 0;
   height = TIME_AXIS_HEIGHT;
 
   constructor(readonly host: ViewHost) {
-    this.el = el('div', { class: 'oc-time-axis' });
+    this.el = el('div', { class: 'vc-time-axis' });
     this.el.appendChild(this.layer.canvas);
   }
 

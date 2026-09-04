@@ -33,7 +33,7 @@ export class Emitter<Events extends Record<string, unknown>> {
       try {
         fn(payload);
       } catch (e) {
-        console.error(`[openchart] listener for "${String(event)}" threw`, e);
+        console.error(`[vibechart] listener for "${String(event)}" threw`, e);
       }
     }
   }

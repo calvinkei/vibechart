@@ -136,7 +136,7 @@ export class DrawingManager {
       const rc = this.renderContext(ctx, paneId, width, height, dpr, font, d);
       if (!rc) continue;
       ctx.save();
-      try { d.render(rc); } catch (e) { console.error('[openchart] drawing render failed', e); }
+      try { d.render(rc); } catch (e) { console.error('[vibechart] drawing render failed', e); }
       ctx.restore();
     }
   }

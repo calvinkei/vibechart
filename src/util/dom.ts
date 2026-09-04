@@ -23,7 +23,7 @@ export function el<K extends keyof HTMLElementTagNameMap>(
 
 export function svgIcon(svg: string, size = 18): HTMLSpanElement {
   const span = document.createElement('span');
-  span.className = 'oc-icon';
+  span.className = 'vc-icon';
   span.style.width = span.style.height = `${size}px`;
   span.innerHTML = svg;
   return span;
@@ -46,7 +46,7 @@ export function stopEvent(e: Event): void {
   e.stopPropagation();
 }
 
-export function injectStyle(css: string, id = 'openchart-style'): void {
+export function injectStyle(css: string, id = 'vibechart-style'): void {
   if (typeof document === 'undefined') return;
   if (document.getElementById(id)) return;
   const style = document.createElement('style');

@@ -33,12 +33,12 @@ export function openGoToDate(chart: Chart): Dialog {
   let to = timeToDateInput(to0, tz);
 
   const datePane = dlg.tab('Date');
-  const rowD = el('div', { class: 'oc-goto-row' });
+  const rowD = el('div', { class: 'vc-goto-row' });
   rowD.appendChild(el('label', { text: 'Date' }));
   rowD.appendChild(withEnter(dateTimeInput('date', date, (v) => { date = v; })));
   datePane.appendChild(rowD);
   if (intraday) {
-    const rowT = el('div', { class: 'oc-goto-row' });
+    const rowT = el('div', { class: 'vc-goto-row' });
     rowT.appendChild(el('label', { text: 'Time' }));
     rowT.appendChild(withEnter(dateTimeInput('time', time, (v) => { time = v; }, { step: 60 })));
     datePane.appendChild(rowT);
@@ -46,11 +46,11 @@ export function openGoToDate(chart: Chart): Dialog {
   datePane.appendChild(note(`Times are in the chart timezone (${tz}).`));
 
   const rangePane = dlg.tab('Custom range');
-  const rowF = el('div', { class: 'oc-goto-row' });
+  const rowF = el('div', { class: 'vc-goto-row' });
   rowF.appendChild(el('label', { text: 'From' }));
   rowF.appendChild(withEnter(dateTimeInput('date', from, (v) => { from = v; })));
   rangePane.appendChild(rowF);
-  const rowTo = el('div', { class: 'oc-goto-row' });
+  const rowTo = el('div', { class: 'vc-goto-row' });
   rowTo.appendChild(el('label', { text: 'To' }));
   rowTo.appendChild(withEnter(dateTimeInput('date', to, (v) => { to = v; })));
   rangePane.appendChild(rowTo);

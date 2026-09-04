@@ -92,13 +92,13 @@ export function createTopToolbar(chart: Chart): { render(): void; updateUndoRedo
   let redoBtn: HTMLButtonElement | null = null;
   let fsBtn: HTMLButtonElement | null = null;
 
-  const onFullscreen = () => { fsBtn?.classList.toggle('oc-active', document.fullscreenElement === root); };
+  const onFullscreen = () => { fsBtn?.classList.toggle('vc-active', document.fullscreenElement === root); };
   document.addEventListener('fullscreenchange', onFullscreen);
 
-  const sep = () => el('div', { class: 'oc-sep' });
-  const chevron = () => el('span', { class: 'oc-icon oc-dd-chevron', html: ICONS.chevronDown });
+  const sep = () => el('div', { class: 'vc-sep' });
+  const chevron = () => el('span', { class: 'vc-icon vc-dd-chevron', html: ICONS.chevronDown });
   const iconBtn = (icon: string, title: string, onClick: (e: MouseEvent) => void, className = ''): HTMLButtonElement => {
-    const b = button('', { icon, className: `oc-icon-btn ${className}`, onClick });
+    const b = button('', { icon, className: `vc-icon-btn ${className}`, onClick });
     tooltip(b, title, root);
     return b;
   };
@@ -110,8 +110,8 @@ export function createTopToolbar(chart: Chart): { render(): void; updateUndoRedo
     const favs = favoriteIntervals(chart.options.toolbar.favoriteIntervals);
     const cur = normalizeResolution(chart.interval);
     // custom interval input row
-    const wrap = el('div', { class: 'oc-interval-custom' });
-    const input = el('input', { class: 'oc-input', placeholder: 'e.g. 1, 5, 60, 1D', spellcheck: false });
+    const wrap = el('div', { class: 'vc-interval-custom' });
+    const input = el('input', { class: 'vc-input', placeholder: 'e.g. 1, 5, 60, 1D', spellcheck: false });
     input.addEventListener('keydown', (e) => {
       e.stopPropagation();
       if (e.key === 'Escape') { closeAllMenus(); return; }
@@ -150,13 +150,13 @@ export function createTopToolbar(chart: Chart): { render(): void; updateUndoRedo
     const supported = chart.symbolInfo?.supported_resolutions;
     for (const f of favs) {
       const p = parseResolution(f);
-      const b = button(p.label, { className: `oc-interval-btn ${f === cur ? 'oc-active' : ''}`, onClick: () => { void chart.setResolution(f); } });
+      const b = button(p.label, { className: `vc-interval-btn ${f === cur ? 'vc-active' : ''}`, onClick: () => { void chart.setResolution(f); } });
       if (!isResolutionSupported(f, supported)) b.disabled = true;
       tooltip(b, p.name, root);
       parent.appendChild(b);
     }
     const inFavs = favs.includes(cur);
-    const dd = button(inFavs ? '' : parseResolution(cur).label, { className: `oc-interval-dd ${inFavs ? 'oc-icon-btn' : 'oc-active'}` });
+    const dd = button(inFavs ? '' : parseResolution(cur).label, { className: `vc-interval-dd ${inFavs ? 'vc-icon-btn' : 'vc-active'}` });
     dd.appendChild(chevron());
     tooltip(dd, `Time interval — ${parseResolution(cur).name}`, root);
     dropdown(dd, root, intervalMenuItems);
@@ -185,11 +185,11 @@ export function createTopToolbar(chart: Chart): { render(): void; updateUndoRedo
     for (const f of favs) {
       const info = CHART_TYPES.find((c) => c.type === f);
       if (!info) continue;
-      const b = iconBtn(info.icon, info.name, () => chart.setChartType(info.type), f === cur ? 'oc-active' : '');
+      const b = iconBtn(info.icon, info.name, () => chart.setChartType(info.type), f === cur ? 'vc-active' : '');
       parent.appendChild(b);
     }
     const info = chartTypeInfo(cur);
-    const dd = button('', { icon: info.icon, className: `oc-icon-btn oc-charttype-dd ${favs.includes(cur) ? '' : 'oc-active'}` });
+    const dd = button('', { icon: info.icon, className: `vc-icon-btn vc-charttype-dd ${favs.includes(cur) ? '' : 'vc-active'}` });
     dd.appendChild(chevron());
     tooltip(dd, `Chart type — ${info.name}`, root);
     dropdown(dd, root, chartTypeMenuItems);
@@ -234,11 +234,11 @@ export function createTopToolbar(chart: Chart): { render(): void; updateUndoRedo
     host.innerHTML = '';
     undoBtn = redoBtn = fsBtn = null;
     const o = chart.options.toolbar;
-    const left = el('div', { class: 'oc-tb-group oc-tb-left' });
-    const right = el('div', { class: 'oc-tb-group oc-tb-right' });
+    const left = el('div', { class: 'vc-tb-group vc-tb-left' });
+    const right = el('div', { class: 'vc-tb-group vc-tb-right' });
 
     if (o.symbolSearch) {
-      const sym = button(chart.symbol || 'Symbol', { icon: 'search', className: 'oc-symbol-btn', onClick: () => openDialog(chart, 'symbolSearch') });
+      const sym = button(chart.symbol || 'Symbol', { icon: 'search', className: 'vc-symbol-btn', onClick: () => openDialog(chart, 'symbolSearch') });
       tooltip(sym, () => { const i = chart.symbolInfo; return i ? `${i.description}${i.exchange ? ` · ${i.exchange}` : ''} (${modKey()}+K)` : `Symbol search (${modKey()}+K)`; }, root);
       left.appendChild(sym);
       if (o.compare) left.appendChild(iconBtn('compare', 'Compare or add symbol', () => openDialog(chart, 'compare')));
@@ -247,7 +247,7 @@ export function createTopToolbar(chart: Chart): { render(): void; updateUndoRedo
     if (o.intervals) { renderIntervals(left); left.appendChild(sep()); }
     if (o.chartTypes) { renderChartTypes(left); left.appendChild(sep()); }
     if (o.indicators) {
-      const b = button('Indicators', { icon: 'fx', className: 'oc-indicators-btn', onClick: () => openDialog(chart, 'indicators') });
+      const b = button('Indicators', { icon: 'fx', className: 'vc-indicators-btn', onClick: () => openDialog(chart, 'indicators') });
       tooltip(b, 'Indicators, metrics & strategies ( / )', root);
       left.appendChild(b);
     }

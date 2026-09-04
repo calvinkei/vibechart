@@ -43,7 +43,7 @@ export interface FloatingToolbar {
 export function createFloatingToolbar(chart: Chart): FloatingToolbar {
   const root = chart.root;
   const area = chart.chartAreaEl;
-  const bar = el('div', { class: 'oc-floating-toolbar' });
+  const bar = el('div', { class: 'vc-floating-toolbar' });
   bar.hidden = true;
   area.appendChild(bar);
   let current: Drawing | null = null;
@@ -59,7 +59,7 @@ export function createFloatingToolbar(chart: Chart): FloatingToolbar {
 
   // ---- drag by grip ------------------------------------------------------------------------------
   function makeGrip(): HTMLElement {
-    const grip = el('span', { class: 'oc-ft-grip', html: ICONS.dragHandle, title: 'Drag to move' });
+    const grip = el('span', { class: 'vc-ft-grip', html: ICONS.dragHandle, title: 'Drag to move' });
     grip.addEventListener('mousedown', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -94,11 +94,11 @@ export function createFloatingToolbar(chart: Chart): FloatingToolbar {
     const styleKeyName = defs.find((p) => p.type === 'lineStyle')?.key;
     const update = (patch: Record<string, unknown>) => dm.updateStyle(d, patch);
     const iconBtn = (icon: string, title: string, onClick: () => void, active = false) => {
-      const b = button('', { icon, className: active ? 'oc-active' : '', onClick });
+      const b = button('', { icon, className: active ? 'vc-active' : '', onClick });
       tooltip(b, title, root);
       return b;
     };
-    const sep = () => el('span', { class: 'oc-sep' });
+    const sep = () => el('span', { class: 'vc-sep' });
 
     bar.appendChild(makeGrip());
 

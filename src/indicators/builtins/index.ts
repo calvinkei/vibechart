@@ -26,7 +26,7 @@ export function registerBuiltinIndicators(): void {
   registered = true;
   const seen = new Set<string>();
   for (const def of allBuiltinIndicators()) {
-    if (seen.has(def.id)) { console.warn(`[openchart] duplicate indicator id: ${def.id}`); continue; }
+    if (seen.has(def.id)) { console.warn(`[vibechart] duplicate indicator id: ${def.id}`); continue; }
     seen.add(def.id);
     registerIndicator(def);
   }

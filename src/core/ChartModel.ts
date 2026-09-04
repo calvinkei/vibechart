@@ -255,7 +255,7 @@ export class ChartModel {
 
   addIndicator(defOrId: IndicatorDefinition | string, inputs?: Record<string, any>, opts: { paneId?: string; priceScaleId?: string; id?: string; overlay?: boolean } = {}): IndicatorInstance | null {
     const def = typeof defOrId === 'string' ? getIndicator(defOrId) : defOrId;
-    if (!def) { console.warn(`[openchart] unknown indicator: ${String(defOrId)}`); return null; }
+    if (!def) { console.warn(`[vibechart] unknown indicator: ${String(defOrId)}`); return null; }
     const inst = new IndicatorInstance(def, inputs, opts.id);
     if (def.precision === 'inherit' || def.precision === undefined) inst.priceFormat = this.mainSeries.priceFormat;
     else inst.priceFormat = { type: def.format === 'volume' ? 'volume' : 'price', precision: def.precision, minMove: 1 };

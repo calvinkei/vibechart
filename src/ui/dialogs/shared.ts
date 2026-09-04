@@ -12,7 +12,7 @@ import { dateParts, partsToTime, resolveTimezone, pad2 } from '../../util/time';
 import { readJson, visibleForResolution } from './helpers';
 import css from './dialogs.css?inline';
 
-export const DIALOG_STYLE_ID = 'openchart-dialogs-style';
+export const DIALOG_STYLE_ID = 'vibechart-dialogs-style';
 
 /** Inject dialogs.css once. `injectStyle` short-circuits after the base stylesheet was injected (global flag), so fall back to a manual append. */
 export function injectDialogStyles(): void {
@@ -59,12 +59,12 @@ export function localInputToTime(value: string, tz: string, timeValue?: string):
 }
 
 export function note(text: string): HTMLElement {
-  return el('div', { class: 'oc-dlg-note', text });
+  return el('div', { class: 'vc-dlg-note', text });
 }
 
-/** Native date/time input styled like oc-input. */
+/** Native date/time input styled like vc-input. */
 export function dateTimeInput(type: 'date' | 'time' | 'datetime-local', value: string, onChange: (v: string) => void, opts: { step?: number } = {}): HTMLInputElement {
-  const inp = el('input', { class: 'oc-input', type, value });
+  const inp = el('input', { class: 'vc-input', type, value });
   if (opts.step !== undefined) inp.step = String(opts.step);
   inp.addEventListener('change', () => onChange(inp.value));
   inp.addEventListener('keydown', (e) => { if (e.key !== 'Escape' && e.key !== 'Enter') e.stopPropagation(); });
@@ -73,10 +73,10 @@ export function dateTimeInput(type: 'date' | 'time' | 'datetime-local', value: s
 
 /** Range slider with a % label (used for transparency/opacity). */
 export function rangeInput(value: number, onChange: (v: number) => void, opts: { min?: number; max?: number; step?: number; suffix?: string } = {}): HTMLElement {
-  const wrap = el('span', { class: 'oc-dlg-inline' });
-  const inp = el('input', { class: 'oc-dlg-range', type: 'range', min: String(opts.min ?? 0), max: String(opts.max ?? 100), step: String(opts.step ?? 1) });
+  const wrap = el('span', { class: 'vc-dlg-inline' });
+  const inp = el('input', { class: 'vc-dlg-range', type: 'range', min: String(opts.min ?? 0), max: String(opts.max ?? 100), step: String(opts.step ?? 1) });
   inp.value = String(value);
-  const lab = el('span', { class: 'oc-dlg-range-val', text: `${value}${opts.suffix ?? '%'}` });
+  const lab = el('span', { class: 'vc-dlg-range-val', text: `${value}${opts.suffix ?? '%'}` });
   inp.addEventListener('input', () => { lab.textContent = `${inp.value}${opts.suffix ?? '%'}`; onChange(+inp.value); });
   inp.addEventListener('keydown', (e) => e.stopPropagation());
   wrap.appendChild(inp);

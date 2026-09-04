@@ -93,7 +93,7 @@ export const ICONS: Record<string, string> = {
 
 export function icon(name: string, size = 18): HTMLSpanElement {
   const span = document.createElement('span');
-  span.className = 'oc-icon';
+  span.className = 'vc-icon';
   span.style.width = `${size}px`;
   span.style.height = `${size}px`;
   span.innerHTML = ICONS[name] ?? ICONS.dot;

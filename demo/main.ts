@@ -48,8 +48,8 @@ $('pct').onclick = () => { const ps = chart.priceScale(); ps.setMode(ps.getMode(
 $('reset').onclick = () => chart.resetView();
 $('shot').onclick = () => { const url = chart.takeScreenshot(); const w = window.open(); if (w) w.document.write(`<img src="${url}" style="max-width:100%">`); };
 let saved: any = null;
-$('save').onclick = () => { saved = chart.save(); localStorage.setItem('oc-demo', JSON.stringify(saved)); $('status').textContent = 'saved'; };
-$('load').onclick = () => { const s = saved ?? JSON.parse(localStorage.getItem('oc-demo') || 'null'); if (s) chart.load(s); };
+$('save').onclick = () => { saved = chart.save(); localStorage.setItem('vc-demo', JSON.stringify(saved)); $('status').textContent = 'saved'; };
+$('load').onclick = () => { const s = saved ?? JSON.parse(localStorage.getItem('vc-demo') || 'null'); if (s) chart.load(s); };
 
 const feedBtn = document.createElement('button');
 feedBtn.textContent = live ? 'Use sample data' : 'Use live Binance data';

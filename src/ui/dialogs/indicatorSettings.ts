@@ -45,7 +45,7 @@ export function openIndicatorSettings(chart: Chart, inst: IndicatorInstance): Di
     title: def.name,
     container: chart.root,
     width: 560,
-    className: 'oc-settings-dialog',
+    className: 'vc-settings-dialog',
     tabs: ['Inputs', 'Style', 'Visibility'],
     buttons: [
       { label: 'Defaults', left: true, onClick: () => { resetDefaults(); renderAll(); } },
@@ -89,8 +89,8 @@ export function openIndicatorSettings(chart: Chart, inst: IndicatorInstance): Di
 
   // ---- Style -----------------------------------------------------------------------------------
   function plotRow(pid: string, title: string, st: PlotStyle): HTMLElement {
-    const row = el('div', { class: 'oc-plot-row' });
-    const head = el('span', { class: 'oc-plot-title' });
+    const row = el('div', { class: 'vc-plot-row' });
+    const head = el('span', { class: 'vc-plot-title' });
     head.appendChild(checkbox(st.visible, (v) => { st.visible = v; redraw(); }));
     head.appendChild(el('span', { text: title }));
     row.appendChild(head);
@@ -125,8 +125,8 @@ export function openIndicatorSettings(chart: Chart, inst: IndicatorInstance): Di
     if (bands.length) {
       pane.appendChild(formSection('Bands'));
       for (const b of bands) {
-        const row = el('div', { class: 'oc-plot-row' });
-        const head = el('span', { class: 'oc-plot-title' });
+        const row = el('div', { class: 'vc-plot-row' });
+        const head = el('span', { class: 'vc-plot-title' });
         head.appendChild(checkbox(b.visible, (v) => { b.visible = v; redraw(); }));
         head.appendChild(el('span', { text: b.title }));
         row.appendChild(head);
@@ -141,8 +141,8 @@ export function openIndicatorSettings(chart: Chart, inst: IndicatorInstance): Di
     if (fills.length) {
       pane.appendChild(formSection('Fills'));
       for (const f of fills) {
-        const row = el('div', { class: 'oc-plot-row' });
-        const head = el('span', { class: 'oc-plot-title' });
+        const row = el('div', { class: 'vc-plot-row' });
+        const head = el('span', { class: 'vc-plot-title' });
         head.appendChild(checkbox(f.visible, (v) => { f.visible = v; redraw(); }));
         head.appendChild(el('span', { text: f.title }));
         row.appendChild(head);
@@ -186,15 +186,15 @@ export function openIndicatorSettings(chart: Chart, inst: IndicatorInstance): Di
     const commit = () => applyIndicatorVisibility(chart);
     pane.appendChild(note('The indicator is drawn only on the selected intervals.'));
     for (const b of VISIBILITY_BUCKETS) {
-      const row = el('div', { class: 'oc-vis-row' });
+      const row = el('div', { class: 'vc-vis-row' });
       row.appendChild(checkbox(!!v[b.key], (on) => { (v as any)[b.key] = on; commit(); }, b.label));
-      row.appendChild(el('span', { class: 'oc-vis-label' }));
+      row.appendChild(el('span', { class: 'vc-vis-label' }));
       row.appendChild(numberInput((v as any)[`${b.key}From`], (n) => { (v as any)[`${b.key}From`] = n; commit(); }, { min: b.min, max: b.max, int: true }));
-      row.appendChild(el('span', { class: 'oc-vis-dash', text: '–' }));
+      row.appendChild(el('span', { class: 'vc-vis-dash', text: '–' }));
       row.appendChild(numberInput((v as any)[`${b.key}To`], (n) => { (v as any)[`${b.key}To`] = n; commit(); }, { min: b.min, max: b.max, int: true }));
       pane.appendChild(row);
     }
-    const rr = el('div', { class: 'oc-vis-row' });
+    const rr = el('div', { class: 'vc-vis-row' });
     rr.appendChild(checkbox(v.ranges, (on) => { v.ranges = on; commit(); }, 'Ranges'));
     pane.appendChild(rr);
   }

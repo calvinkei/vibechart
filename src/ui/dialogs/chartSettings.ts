@@ -52,7 +52,7 @@ export function openChartSettings(chart: Chart, initial: ChartSettingsTab = 'sym
     title: 'Chart settings',
     container: chart.root,
     width: 560,
-    className: 'oc-settings-dialog',
+    className: 'vc-settings-dialog',
     tabs: TABS.map((t) => t[1]),
     buttons: [
       { label: 'Defaults', left: true, onClick: () => resetTab(dlg.activeTab) },
@@ -207,7 +207,7 @@ export function openChartSettings(chart: Chart, initial: ChartSettingsTab = 'sym
     pane.appendChild(formRow('Timezone', selectInput(String(get('symbol.timezone') ?? 'exchange'), TIMEZONES.map((t) => ({ value: t.id, label: t.name })), (v) => chart.setTimezone(v))));
 
     const vol = formSection('Volume');
-    vol.id = 'oc-settings-volume';
+    vol.id = 'vc-settings-volume';
     pane.appendChild(vol);
     pane.appendChild(boolRow('Show volume', 'volume.visible'));
     pane.appendChild(colorPairRow('Up / Down color', 'volume.upColor', 'volume.downColor'));
@@ -429,7 +429,7 @@ export function openChartSettings(chart: Chart, initial: ChartSettingsTab = 'sym
   renderAll();
   const initialTab = initial === 'volume' ? 'Symbol' : (TABS.find((t) => t[0] === initial)?.[1] ?? 'Symbol');
   dlg.setTab(initialTab);
-  if (initial === 'volume') setTimeout(() => document.getElementById('oc-settings-volume')?.scrollIntoView({ block: 'start' }), 0);
+  if (initial === 'volume') setTimeout(() => document.getElementById('vc-settings-volume')?.scrollIntoView({ block: 'start' }), 0);
   return dlg;
 }
 

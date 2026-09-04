@@ -27,7 +27,7 @@ export function openObjectTree(chart: Chart, openDialog: OpenDialogFn): Dialog |
     container: chart.root,
     width,
     modal: false,
-    className: 'oc-object-tree',
+    className: 'vc-object-tree',
     x: Math.max(8, chart.root.clientWidth - width - 8),
     y: Math.min(48, Math.max(8, chart.root.clientHeight - 200)),
     onClose: () => { for (const u of unsubs) u(); openTrees.delete(chart); },
@@ -37,7 +37,7 @@ export function openObjectTree(chart: Chart, openDialog: OpenDialogFn): Dialog |
   unsubs.push(chart.subscribe('symbolChanged', schedule), chart.subscribe('intervalChanged', schedule), chart.subscribe('optionsChanged', schedule));
 
   const iconBtn = (name: string, title: string, on: boolean, onClick: (e: MouseEvent) => void) => {
-    const b = el('button', { class: `oc-tree-btn ${on ? 'oc-on' : ''}`, title, html: ICONS[name] });
+    const b = el('button', { class: `vc-tree-btn ${on ? 'vc-on' : ''}`, title, html: ICONS[name] });
     b.addEventListener('mousedown', (e) => e.stopPropagation());
     b.addEventListener('click', (e) => { e.stopPropagation(); onClick(e); });
     return b;
@@ -48,27 +48,27 @@ export function openObjectTree(chart: Chart, openDialog: OpenDialogFn): Dialog |
     const body = dlg.body;
     const scrollTop = body.scrollTop;
     body.innerHTML = '';
-    body.appendChild(el('div', { class: 'oc-tree-section', text: 'Main chart' }));
+    body.appendChild(el('div', { class: 'vc-tree-section', text: 'Main chart' }));
     const info = chart.symbolInfo;
-    const main = el('div', { class: 'oc-tree-row' });
-    main.innerHTML = `<span class="oc-tree-name">${escapeHtml(info?.name ?? chart.symbol)}<span class="oc-tree-sub">${escapeHtml(parseResolution(chart.interval).label.toUpperCase())}${info?.exchange ? ` · ${escapeHtml(info.exchange)}` : ''}</span></span>`;
-    const mainActions = el('span', { class: 'oc-tree-actions' });
+    const main = el('div', { class: 'vc-tree-row' });
+    main.innerHTML = `<span class="vc-tree-name">${escapeHtml(info?.name ?? chart.symbol)}<span class="vc-tree-sub">${escapeHtml(parseResolution(chart.interval).label.toUpperCase())}${info?.exchange ? ` · ${escapeHtml(info.exchange)}` : ''}</span></span>`;
+    const mainActions = el('span', { class: 'vc-tree-actions' });
     mainActions.appendChild(iconBtn('settings', 'Settings', false, () => openDialog(chart, 'chartSettings', 'symbol')));
     main.appendChild(mainActions);
     body.appendChild(main);
 
-    const volRow = el('div', { class: `oc-tree-row ${model.options.volume.visible ? '' : 'oc-hidden'}` });
-    volRow.innerHTML = '<span class="oc-tree-name">Volume</span>';
-    const volActions = el('span', { class: 'oc-tree-actions' });
+    const volRow = el('div', { class: `vc-tree-row ${model.options.volume.visible ? '' : 'vc-hidden'}` });
+    volRow.innerHTML = '<span class="vc-tree-name">Volume</span>';
+    const volActions = el('span', { class: 'vc-tree-actions' });
     volActions.appendChild(iconBtn(model.options.volume.visible ? 'eye' : 'eyeOff', model.options.volume.visible ? 'Hide' : 'Show', false, () => chart.applyOptions({ volume: { visible: !model.options.volume.visible } })));
     volActions.appendChild(iconBtn('settings', 'Settings', false, () => openDialog(chart, 'chartSettings', 'volume')));
     volRow.appendChild(volActions);
     body.appendChild(volRow);
 
     for (const inst of model.indicators) {
-      const row = el('div', { class: `oc-tree-row ${inst.visible ? '' : 'oc-hidden'}` });
-      row.innerHTML = `<span class="oc-tree-name">${escapeHtml(inst.legendTitle(true))}</span>`;
-      const actions = el('span', { class: 'oc-tree-actions' });
+      const row = el('div', { class: `vc-tree-row ${inst.visible ? '' : 'vc-hidden'}` });
+      row.innerHTML = `<span class="vc-tree-name">${escapeHtml(inst.legendTitle(true))}</span>`;
+      const actions = el('span', { class: 'vc-tree-actions' });
       actions.appendChild(iconBtn(inst.visible ? 'eye' : 'eyeOff', inst.visible ? 'Hide' : 'Show', false, () => { inst.visible = !inst.visible; model.invalidate('full'); schedule(); }));
       actions.appendChild(iconBtn('settings', 'Settings', false, () => openDialog(chart, 'indicatorSettings', inst)));
       actions.appendChild(iconBtn('trash', 'Remove', false, () => chart.removeIndicator(inst)));
@@ -77,17 +77,17 @@ export function openObjectTree(chart: Chart, openDialog: OpenDialogFn): Dialog |
       body.appendChild(row);
     }
 
-    body.appendChild(el('div', { class: 'oc-tree-section', text: `Drawings (${dm.drawings.length})` }));
-    if (!dm.drawings.length) body.appendChild(el('div', { class: 'oc-tree-empty', text: 'No drawings on the chart.' }));
+    body.appendChild(el('div', { class: 'vc-tree-section', text: `Drawings (${dm.drawings.length})` }));
+    if (!dm.drawings.length) body.appendChild(el('div', { class: 'vc-tree-empty', text: 'No drawings on the chart.' }));
     const ordered = dm.drawings.slice().reverse(); // top-most first
     ordered.forEach((d, listIndex) => {
-      const row = el('div', { class: `oc-tree-row ${dm.selected === d ? 'oc-active' : ''} ${d.visible ? '' : 'oc-hidden'}`, 'data-id': d.id });
-      const handle = el('span', { class: 'oc-tree-handle', html: ICONS.dragHandle, title: 'Drag to reorder' });
+      const row = el('div', { class: `vc-tree-row ${dm.selected === d ? 'vc-active' : ''} ${d.visible ? '' : 'vc-hidden'}`, 'data-id': d.id });
+      const handle = el('span', { class: 'vc-tree-handle', html: ICONS.dragHandle, title: 'Drag to reorder' });
       handle.addEventListener('mousedown', (e) => startDrag(e, d, listIndex, row));
       row.appendChild(handle);
-      const name = el('span', { class: 'oc-tree-name', text: d.name || d.typeName, title: 'Double-click to rename' });
+      const name = el('span', { class: 'vc-tree-name', text: d.name || d.typeName, title: 'Double-click to rename' });
       row.appendChild(name);
-      const actions = el('span', { class: 'oc-tree-actions' });
+      const actions = el('span', { class: 'vc-tree-actions' });
       actions.appendChild(iconBtn(d.visible ? 'eye' : 'eyeOff', d.visible ? 'Hide' : 'Show', false, () => dm.setVisible(d, !d.visible)));
       actions.appendChild(iconBtn(d.locked ? 'lock' : 'unlock', d.locked ? 'Unlock' : 'Lock', d.locked, () => dm.setLocked(d, !d.locked)));
       actions.appendChild(iconBtn('settings', 'Settings', false, () => openDialog(chart, 'drawingSettings', d)));
@@ -101,7 +101,7 @@ export function openObjectTree(chart: Chart, openDialog: OpenDialogFn): Dialog |
   }
 
   function startRename(d: Drawing, nameEl: HTMLElement): void {
-    const inp = el('input', { class: 'oc-tree-rename', value: d.name || d.typeName });
+    const inp = el('input', { class: 'vc-tree-rename', value: d.name || d.typeName });
     const finish = (commit: boolean) => {
       if (!inp.isConnected) return;
       if (commit) { const v = inp.value.trim(); d.name = v === d.typeName ? '' : v; dm.changed.fire(); }
@@ -122,9 +122,9 @@ export function openObjectTree(chart: Chart, openDialog: OpenDialogFn): Dialog |
     e.stopPropagation();
     const body = dlg.body;
     let target: { list: number; after: boolean } | null = null;
-    row.classList.add('oc-dragging');
-    const rows = () => Array.from(body.querySelectorAll<HTMLElement>('.oc-tree-row[data-id]'));
-    const clear = () => rows().forEach((r) => r.classList.remove('oc-drop-before', 'oc-drop-after'));
+    row.classList.add('vc-dragging');
+    const rows = () => Array.from(body.querySelectorAll<HTMLElement>('.vc-tree-row[data-id]'));
+    const clear = () => rows().forEach((r) => r.classList.remove('vc-drop-before', 'vc-drop-after'));
     const move = (ev: MouseEvent) => {
       clear();
       const all = rows();
@@ -134,7 +134,7 @@ export function openObjectTree(chart: Chart, openDialog: OpenDialogFn): Dialog |
         if (ev.clientY >= r.top && ev.clientY <= r.bottom) {
           const after = ev.clientY > r.top + r.height / 2;
           target = { list: i, after };
-          all[i].classList.add(after ? 'oc-drop-after' : 'oc-drop-before');
+          all[i].classList.add(after ? 'vc-drop-after' : 'vc-drop-before');
           break;
         }
       }
@@ -143,7 +143,7 @@ export function openObjectTree(chart: Chart, openDialog: OpenDialogFn): Dialog |
       window.removeEventListener('mousemove', move);
       window.removeEventListener('mouseup', up);
       clear();
-      row.classList.remove('oc-dragging');
+      row.classList.remove('vc-dragging');
       if (!target) return;
       // list index -> array index (list is reversed: 0 = top-most = last in array)
       const n = dm.drawings.length;

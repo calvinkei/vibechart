@@ -116,7 +116,7 @@ export function createLeftToolbar(chart: Chart): LeftToolbar {
     if (flyout?.id === id) return;
     closeFlyout();
     closeAllMenus();
-    const fl = el('div', { class: 'oc-tool-flyout' });
+    const fl = el('div', { class: 'vc-tool-flyout' });
     for (const n of content()) fl.appendChild(n);
     fl.addEventListener('mouseenter', () => clearTimeout(flyoutTimer));
     fl.addEventListener('mouseleave', scheduleClose);
@@ -130,7 +130,7 @@ export function createLeftToolbar(chart: Chart): LeftToolbar {
   }
 
   function flyoutItem(opts: { label: string; icon: string; active: boolean; shortcut?: string; star?: { active: boolean; onToggle: () => void }; onClick: () => void }): HTMLElement {
-    const row = el('div', { class: `oc-menu-item ${opts.active ? 'oc-active' : ''}` });
+    const row = el('div', { class: `vc-menu-item ${opts.active ? 'vc-active' : ''}` });
     row.appendChild(menuRow({ label: opts.label, icon: opts.icon, shortcut: opts.shortcut, star: opts.star ? { active: opts.star.active, onToggle: opts.star.onToggle } : undefined }));
     row.addEventListener('click', (e) => { e.stopPropagation(); opts.onClick(); });
     return row;
@@ -141,8 +141,8 @@ export function createLeftToolbar(chart: Chart): LeftToolbar {
     const prev = cursor;
     cursor = mode;
     if (chart.activeTool) chart.setTool(null);
-    root.classList.remove('oc-cursor-dot', 'oc-cursor-arrow', 'oc-cursor-eraser');
-    if (mode !== 'cross') root.classList.add(`oc-cursor-${mode}`);
+    root.classList.remove('vc-cursor-dot', 'vc-cursor-arrow', 'vc-cursor-eraser');
+    if (mode !== 'cross') root.classList.add(`vc-cursor-${mode}`);
     if (mode === 'arrow' && prev !== 'arrow') {
       savedCrosshair = chart.options.crosshair.mode === 'hidden' ? 'normal' : chart.options.crosshair.mode;
       chart.applyOptions({ crosshair: { mode: 'hidden' } });
@@ -176,7 +176,7 @@ export function createLeftToolbar(chart: Chart): LeftToolbar {
     const favs = loadPref<string[]>('favTools', []);
     const nodes: HTMLElement[] = [];
     for (const s of g.sections) {
-      if (s.title) nodes.push(el('div', { class: 'oc-menu-title', text: s.title }));
+      if (s.title) nodes.push(el('div', { class: 'vc-menu-title', text: s.title }));
       for (const t of s.tools) {
         nodes.push(flyoutItem({
           label: t.toolName, icon: t.icon || 'dot', active: chart.activeTool === t.toolId, shortcut: hotkeyLabel(t.toolId),
@@ -189,11 +189,11 @@ export function createLeftToolbar(chart: Chart): LeftToolbar {
   }
 
   function toolButton(g: GroupedTools): HTMLElement {
-    const wrap = el('div', { class: 'oc-tool-group' });
+    const wrap = el('div', { class: 'vc-tool-group' });
     const last = lastToolOf(g);
-    const btn = button('', { icon: last.icon || 'dot', className: 'oc-tool-btn', onClick: () => activateTool(lastToolOf(g).toolId, g.def.id) });
+    const btn = button('', { icon: last.icon || 'dot', className: 'vc-tool-btn', onClick: () => activateTool(lastToolOf(g).toolId, g.def.id) });
     tooltip(btn, () => `${lastToolOf(g).toolName} — ${g.def.title}`, root);
-    const arrow = el('div', { class: 'oc-tool-arrow-zone', title: g.def.title }, [el('span', { class: 'oc-tool-arrow' })]);
+    const arrow = el('div', { class: 'vc-tool-arrow-zone', title: g.def.title }, [el('span', { class: 'vc-tool-arrow' })]);
     const open = () => showFlyout(g.def.id, btn, () => groupFlyoutContent(g));
     arrow.addEventListener('mouseenter', open);
     arrow.addEventListener('mousedown', (e) => e.stopPropagation());
@@ -213,9 +213,9 @@ export function createLeftToolbar(chart: Chart): LeftToolbar {
     const favs = loadPref<string[]>('favTools', []).map((id) => getDrawingTool(id)).filter((t): t is DrawingCtor => !!t);
     if (!favs.length) { favHost.style.display = 'none'; return; }
     favHost.style.display = '';
-    favHost.appendChild(el('div', { class: 'oc-sep-h' }));
+    favHost.appendChild(el('div', { class: 'vc-sep-h' }));
     for (const t of favs) {
-      const b = button('', { icon: t.icon || 'dot', className: 'oc-tool-btn oc-fav-tool', onClick: () => activateTool(t.toolId, String(t.group)) });
+      const b = button('', { icon: t.icon || 'dot', className: 'vc-tool-btn vc-fav-tool', onClick: () => activateTool(t.toolId, String(t.group)) });
       tooltip(b, `${t.toolName} (favorite)`, root);
       favBtns.set(t.toolId, b);
       favHost.appendChild(b);
@@ -254,8 +254,8 @@ export function createLeftToolbar(chart: Chart): LeftToolbar {
   }
 
   function withArrow(btn: HTMLButtonElement, items: () => MenuItem[]): HTMLElement {
-    const wrap = el('div', { class: 'oc-tool-group' });
-    const arrow = el('div', { class: 'oc-tool-arrow-zone' }, [el('span', { class: 'oc-tool-arrow' })]);
+    const wrap = el('div', { class: 'vc-tool-group' });
+    const arrow = el('div', { class: 'vc-tool-arrow-zone' }, [el('span', { class: 'vc-tool-arrow' })]);
     arrow.addEventListener('mousedown', (e) => e.stopPropagation());
     arrow.addEventListener('click', (e) => { e.stopPropagation(); menuAt(btn, items()); });
     wrap.appendChild(btn);
@@ -270,16 +270,16 @@ export function createLeftToolbar(chart: Chart): LeftToolbar {
     groupBtns.clear();
     favBtns.clear();
     const dm = chart.drawings;
-    const inner = el('div', { class: 'oc-left-toolbar-inner' });
-    const sepH = () => el('div', { class: 'oc-sep-h' });
+    const inner = el('div', { class: 'vc-left-toolbar-inner' });
+    const sepH = () => el('div', { class: 'vc-sep-h' });
 
     // cursors
     {
-      const wrap = el('div', { class: 'oc-tool-group' });
+      const wrap = el('div', { class: 'vc-tool-group' });
       const cur = CURSORS.find((c) => c.id === cursor) ?? CURSORS[0];
-      cursorBtn = button('', { icon: cur.icon, className: 'oc-tool-btn oc-cursor-btn', onClick: () => { if (chart.activeTool) chart.setTool(null); else setCursor(cursor); } });
+      cursorBtn = button('', { icon: cur.icon, className: 'vc-tool-btn vc-cursor-btn', onClick: () => { if (chart.activeTool) chart.setTool(null); else setCursor(cursor); } });
       tooltip(cursorBtn, () => `${(CURSORS.find((c) => c.id === cursor) ?? CURSORS[0]).name} cursor`, root);
-      const arrow = el('div', { class: 'oc-tool-arrow-zone' }, [el('span', { class: 'oc-tool-arrow' })]);
+      const arrow = el('div', { class: 'vc-tool-arrow-zone' }, [el('span', { class: 'vc-tool-arrow' })]);
       const open = () => showFlyout('cursors', cursorBtn!, () => CURSORS.map((c) => flyoutItem({ label: c.name, icon: c.icon, active: c.id === cursor && !chart.activeTool, onClick: () => setCursor(c.id) })));
       arrow.addEventListener('mouseenter', open);
       arrow.addEventListener('mousedown', (e) => e.stopPropagation());
@@ -297,46 +297,46 @@ export function createLeftToolbar(chart: Chart): LeftToolbar {
     for (const g of grouped) inner.appendChild(toolButton(g));
 
     // favorites
-    favHost = el('div', { class: 'oc-tool-favs' });
+    favHost = el('div', { class: 'vc-tool-favs' });
     inner.appendChild(favHost);
     renderFavorites();
     inner.appendChild(sepH());
 
     // measure / zoom
-    const measure = button('', { icon: 'measure', className: 'oc-tool-btn', onClick: () => { if (getDrawingTool('measure')) activateTool('measure'); else toast(root, 'Measure tool is not available in this build'); } });
+    const measure = button('', { icon: 'measure', className: 'vc-tool-btn', onClick: () => { if (getDrawingTool('measure')) activateTool('measure'); else toast(root, 'Measure tool is not available in this build'); } });
     tooltip(measure, `Measure (${'⇧'} + drag)`, root);
     inner.appendChild(measure);
-    const zi = button('', { icon: 'zoomIn', className: 'oc-tool-btn', onClick: () => chart.timeScale().zoomIn() });
+    const zi = button('', { icon: 'zoomIn', className: 'vc-tool-btn', onClick: () => chart.timeScale().zoomIn() });
     tooltip(zi, 'Zoom in (+)', root);
-    const zo = button('', { icon: 'zoomOut', className: 'oc-tool-btn', onClick: () => chart.timeScale().zoomOut() });
+    const zo = button('', { icon: 'zoomOut', className: 'vc-tool-btn', onClick: () => chart.timeScale().zoomOut() });
     tooltip(zo, 'Zoom out (−)', root);
     inner.appendChild(zi);
     inner.appendChild(zo);
     inner.appendChild(sepH());
 
     // magnet
-    magnetBtn = button('', { icon: 'magnet', className: 'oc-tool-btn', onClick: () => { dm.magnet = dm.magnet === 'none' ? loadPref<'weak' | 'strong'>('magnetMode', 'weak') : 'none'; updateState(); } });
+    magnetBtn = button('', { icon: 'magnet', className: 'vc-tool-btn', onClick: () => { dm.magnet = dm.magnet === 'none' ? loadPref<'weak' | 'strong'>('magnetMode', 'weak') : 'none'; updateState(); } });
     tooltip(magnetBtn, () => `Magnet mode — ${dm.magnet === 'none' ? 'off' : dm.magnet}`, root);
     inner.appendChild(withArrow(magnetBtn, magnetItems));
     // stay in drawing mode
-    stayBtn = button('', { icon: 'pencil', className: 'oc-tool-btn', onClick: () => { dm.stayInDrawingMode = !dm.stayInDrawingMode; updateState(); } });
+    stayBtn = button('', { icon: 'pencil', className: 'vc-tool-btn', onClick: () => { dm.stayInDrawingMode = !dm.stayInDrawingMode; updateState(); } });
     tooltip(stayBtn, 'Stay in drawing mode', root);
     inner.appendChild(stayBtn);
     // lock all
-    lockBtn = button('', { icon: 'lock', className: 'oc-tool-btn', onClick: () => { dm.setLockAll(!dm.lockAll); updateState(); } });
+    lockBtn = button('', { icon: 'lock', className: 'vc-tool-btn', onClick: () => { dm.setLockAll(!dm.lockAll); updateState(); } });
     tooltip(lockBtn, 'Lock all drawings', root);
     inner.appendChild(lockBtn);
     // hide all
-    hideBtn = button('', { icon: 'eyeOff', className: 'oc-tool-btn', onClick: () => { dm.setHideAll(!dm.hideAll); updateState(); } });
+    hideBtn = button('', { icon: 'eyeOff', className: 'vc-tool-btn', onClick: () => { dm.setHideAll(!dm.hideAll); updateState(); } });
     tooltip(hideBtn, `Hide all drawings (${modKey()}+${altKey()}+H)`, root);
     inner.appendChild(hideBtn);
     // remove
-    const rm = button('', { icon: 'trash', className: 'oc-tool-btn', onClick: () => menuAt(rm, removeItems()) });
+    const rm = button('', { icon: 'trash', className: 'vc-tool-btn', onClick: () => menuAt(rm, removeItems()) });
     tooltip(rm, 'Remove drawings / indicators', root);
     inner.appendChild(rm);
 
-    inner.appendChild(el('div', { class: 'oc-spacer' }));
-    const tree = button('', { icon: 'objectTree', className: 'oc-tool-btn', onClick: () => openDialog(chart, 'objectTree') });
+    inner.appendChild(el('div', { class: 'vc-spacer' }));
+    const tree = button('', { icon: 'objectTree', className: 'vc-tool-btn', onClick: () => openDialog(chart, 'objectTree') });
     tooltip(tree, 'Object tree', root);
     inner.appendChild(tree);
 
@@ -345,7 +345,7 @@ export function createLeftToolbar(chart: Chart): LeftToolbar {
   }
 
   function setIcon(btn: HTMLElement, svg: string): void {
-    const ic = btn.querySelector('.oc-icon');
+    const ic = btn.querySelector('.vc-icon');
     if (ic && ic.innerHTML !== svg) ic.innerHTML = svg;
   }
 
@@ -355,27 +355,27 @@ export function createLeftToolbar(chart: Chart): LeftToolbar {
     if (cursorBtn) {
       const cur = CURSORS.find((c) => c.id === cursor) ?? CURSORS[0];
       setIcon(cursorBtn, cur.id === 'dot' ? DOT_CURSOR_ICON : ICONS[cur.icon]);
-      cursorBtn.classList.toggle('oc-active', !active);
+      cursorBtn.classList.toggle('vc-active', !active);
     }
     for (const { btn, g } of groupBtns.values()) {
       const t = active ? g.tools.find((x) => x.toolId === active) : undefined;
       if (t) savePref(`lastTool.${g.def.id}`, t.toolId);
       const show = t ?? lastToolOf(g);
       setIcon(btn, show.icon || ICONS.dot);
-      btn.classList.toggle('oc-active', !!t);
+      btn.classList.toggle('vc-active', !!t);
     }
-    for (const [id, b] of favBtns) b.classList.toggle('oc-active', active === id);
+    for (const [id, b] of favBtns) b.classList.toggle('vc-active', active === id);
     if (flyout) {
-      for (const row of Array.from(flyout.el.querySelectorAll<HTMLElement>('.oc-menu-item'))) {
-        const label = row.querySelector('.oc-menu-label')?.textContent;
+      for (const row of Array.from(flyout.el.querySelectorAll<HTMLElement>('.vc-menu-item'))) {
+        const label = row.querySelector('.vc-menu-label')?.textContent;
         const t = label ? grouped.flatMap((g) => g.tools).find((x) => x.toolName === label) : undefined;
-        if (t) row.classList.toggle('oc-active', t.toolId === active);
+        if (t) row.classList.toggle('vc-active', t.toolId === active);
       }
     }
-    magnetBtn?.classList.toggle('oc-active', dm.magnet !== 'none');
-    stayBtn?.classList.toggle('oc-active', dm.stayInDrawingMode);
-    lockBtn?.classList.toggle('oc-active', dm.lockAll);
-    hideBtn?.classList.toggle('oc-active', dm.hideAll);
+    magnetBtn?.classList.toggle('vc-active', dm.magnet !== 'none');
+    stayBtn?.classList.toggle('vc-active', dm.stayInDrawingMode);
+    lockBtn?.classList.toggle('vc-active', dm.lockAll);
+    hideBtn?.classList.toggle('vc-active', dm.hideAll);
   }
 
   return {
@@ -386,7 +386,7 @@ export function createLeftToolbar(chart: Chart): LeftToolbar {
     destroy() {
       closeFlyout();
       for (const u of unsubs) u();
-      root.classList.remove('oc-cursor-dot', 'oc-cursor-arrow', 'oc-cursor-eraser');
+      root.classList.remove('vc-cursor-dot', 'vc-cursor-arrow', 'vc-cursor-eraser');
       host.innerHTML = '';
     },
   };

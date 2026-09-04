@@ -357,7 +357,7 @@ export function createContextMenus(chart: Chart): ContextMenus {
 
   function show(evt: ChartEvents['contextMenu']): void {
     // The legend "More" button emits a pane contextMenu followed by a sourceMenu; skip the pane menu.
-    if (last && last.type === 'click' && (last.target as HTMLElement | null)?.closest?.('.oc-legend')) return;
+    if (last && last.type === 'click' && (last.target as HTMLElement | null)?.closest?.('.vc-legend')) return;
     const p = rootPoint(evt);
     let items: MenuItem[];
     switch (evt.target) {

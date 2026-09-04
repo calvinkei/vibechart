@@ -135,7 +135,7 @@ export class Chart {
 
   constructor(opts: ChartConstructorOptions) {
     const container = typeof opts.container === 'string' ? document.querySelector<HTMLElement>(opts.container) : opts.container;
-    if (!container) throw new Error('[openchart] container not found');
+    if (!container) throw new Error('[vibechart] container not found');
     this.container = container;
     const { container: _c, datafeed, symbol, interval, chartType, studies, savedData, disableUI, initialBars, symbolSettings, ...optionOverrides } = opts;
     if (symbolSettings) (optionOverrides as any).symbol = symbolSettings;
@@ -150,19 +150,19 @@ export class Chart {
     injectStyle(baseCss);
 
     // DOM
-    this.root = el('div', { class: `oc-root oc-theme-${theme} ${options.className}` });
-    this.topToolbarEl = el('div', { class: 'oc-top-toolbar' });
-    this.bodyEl = el('div', { class: 'oc-body' });
-    this.leftToolbarEl = el('div', { class: 'oc-left-toolbar' });
-    this.chartAreaEl = el('div', { class: 'oc-chart-area', tabindex: '0' });
-    this.panesEl = el('div', { class: 'oc-panes' });
-    this.bottomBarEl = el('div', { class: 'oc-bottom-bar' });
-    this.overlayEl = el('div', { class: 'oc-overlay' });
+    this.root = el('div', { class: `vc-root vc-theme-${theme} ${options.className}` });
+    this.topToolbarEl = el('div', { class: 'vc-top-toolbar' });
+    this.bodyEl = el('div', { class: 'vc-body' });
+    this.leftToolbarEl = el('div', { class: 'vc-left-toolbar' });
+    this.chartAreaEl = el('div', { class: 'vc-chart-area', tabindex: '0' });
+    this.panesEl = el('div', { class: 'vc-panes' });
+    this.bottomBarEl = el('div', { class: 'vc-bottom-bar' });
+    this.overlayEl = el('div', { class: 'vc-overlay' });
     this._timeAxis = new TimeAxisView(this._host());
-    this._timeRow = el('div', { class: 'oc-time-row' });
-    this._timeRow.appendChild(el('div', { class: 'oc-axis-spacer oc-axis-spacer-left' }));
+    this._timeRow = el('div', { class: 'vc-time-row' });
+    this._timeRow.appendChild(el('div', { class: 'vc-axis-spacer vc-axis-spacer-left' }));
     this._timeRow.appendChild(this._timeAxis.el);
-    this._timeRow.appendChild(el('div', { class: 'oc-axis-spacer oc-axis-spacer-right' }));
+    this._timeRow.appendChild(el('div', { class: 'vc-axis-spacer vc-axis-spacer-right' }));
     this.chartAreaEl.appendChild(this.panesEl);
     this.chartAreaEl.appendChild(this._timeRow);
     this.bodyEl.appendChild(this.leftToolbarEl);
@@ -229,7 +229,7 @@ export class Chart {
     m.indicatorsChanged.subscribe(() => { this._syncPanes(); this._invalidate('layout'); });
     m.chartTypeChanged.subscribe((t) => this.events.emit('chartTypeChanged', t));
     m.crosshairMoved.subscribe((c) => this.events.emit('crosshairMoved', c));
-    m.optionsChanged.subscribe((o) => { this.root.className = `oc-root oc-theme-${o.theme} ${o.className}`; this.events.emit('optionsChanged', o); });
+    m.optionsChanged.subscribe((o) => { this.root.className = `vc-root vc-theme-${o.theme} ${o.className}`; this.events.emit('optionsChanged', o); });
     m.timeScale.visibleRangeChanged.subscribe((r) => {
       this.events.emit('visibleRangeChanged', r);
       this._maybeLoadMore();
@@ -377,7 +377,7 @@ export class Chart {
   /** TradingView-like createShape / createMultipointShape */
   createShape(point: DrawingPoint | DrawingPoint[], options: { shape: string; overrides?: Record<string, unknown>; text?: string; lock?: boolean; disableSelection?: boolean; paneId?: string }): Drawing | null {
     const ctor = getDrawingTool(options.shape);
-    if (!ctor) { console.warn(`[openchart] unknown shape: ${options.shape}`); return null; }
+    if (!ctor) { console.warn(`[vibechart] unknown shape: ${options.shape}`); return null; }
     const d = new ctor({ ...(options.overrides || {}), ...(options.text !== undefined ? { text: options.text } : {}) });
     d.points = (Array.isArray(point) ? point : [point]).map((p) => ({ time: p.time > 1e11 ? Math.floor(p.time / 1000) : p.time, price: p.price }));
     while (d.points.length < d.requiredPoints && d.points.length > 0) d.points.push({ ...d.points[d.points.length - 1] });
@@ -474,7 +474,7 @@ export class Chart {
     ctx.fillStyle = this.model.options.layout.textColor;
     for (const row of this._rows) {
       const r = row.view.legendEl.getBoundingClientRect();
-      const lines = Array.from(row.view.legendEl.querySelectorAll('.oc-legend-row')).map((n) => (n as HTMLElement).innerText.replace(/\s+/g, ' ').trim());
+      const lines = Array.from(row.view.legendEl.querySelectorAll('.vc-legend-row')).map((n) => (n as HTMLElement).innerText.replace(/\s+/g, ' ').trim());
       lines.forEach((line, i) => ctx.fillText(line, Math.round((r.left - rect.left + 6) * this._dpr), Math.round((r.top - rect.top + 14 + i * 18) * this._dpr)));
     }
     return canvas.toDataURL('image/png');
@@ -587,7 +587,7 @@ export class Chart {
     for (const pane of m.panes) {
       let r = existing.get(pane.id);
       if (!r) {
-        const row = el('div', { class: 'oc-pane-row', 'data-pane': pane.id });
+        const row = el('div', { class: 'vc-pane-row', 'data-pane': pane.id });
         const view = new PaneView(this._host(), pane);
         const left = new PriceAxisView(this._host(), pane, 'left');
         const right = new PriceAxisView(this._host(), pane, 'right');
@@ -605,7 +605,7 @@ export class Chart {
     this.panesEl.innerHTML = '';
     rows.forEach((r, i) => {
       if (i > 0) {
-        const sep = el('div', { class: 'oc-pane-separator' }, [el('div', { class: 'oc-pane-separator-line' })]);
+        const sep = el('div', { class: 'vc-pane-separator' }, [el('div', { class: 'vc-pane-separator-line' })]);
         this._bindSeparator(sep, i);
         r.separator = sep;
         this.panesEl.appendChild(sep);
@@ -667,9 +667,9 @@ export class Chart {
       r.left.layout(left, heights[i]);
       r.view.layout(paneW, heights[i]);
       r.right.layout(right, heights[i]);
-      r.view.el.classList.toggle('oc-pane-collapsed', r.pane.collapsed);
+      r.view.el.classList.toggle('vc-pane-collapsed', r.pane.collapsed);
     });
-    const spacers = this._timeRow.querySelectorAll<HTMLElement>('.oc-axis-spacer');
+    const spacers = this._timeRow.querySelectorAll<HTMLElement>('.vc-axis-spacer');
     spacers[0].style.width = `${left}px`;
     spacers[1].style.width = `${right}px`;
     this._timeRow.style.display = timeH ? '' : 'none';
@@ -965,7 +965,7 @@ export class Chart {
     const o = this.model.options;
     const ts = this.model.timeScale;
     const target = e.target as HTMLElement;
-    if (target.closest('.oc-price-axis') || target.closest('.oc-time-axis')) return;
+    if (target.closest('.vc-price-axis') || target.closest('.vc-time-axis')) return;
     const rect = this.panesEl.getBoundingClientRect();
     const x = e.clientX - rect.left - this._axisWidths.left;
     let dx = e.deltaX;
@@ -1003,7 +1003,7 @@ export class Chart {
     if (e.touches.length === 1) {
       const t = e.touches[0];
       const target = t.target as HTMLElement;
-      const paneEl = target.closest('.oc-pane') as HTMLElement | null;
+      const paneEl = target.closest('.vc-pane') as HTMLElement | null;
       if (!paneEl) return;
       const paneId = paneEl.dataset.pane!;
       const rect = paneEl.getBoundingClientRect();
@@ -1070,7 +1070,7 @@ export class Chart {
   private _markTip: HTMLDivElement | null = null;
   private _showMarkTooltip(mark: { tooltip: string[]; label: string } | null, x: number, y: number): void {
     if (!mark) { this._markTip?.remove(); this._markTip = null; return; }
-    if (!this._markTip) { this._markTip = el('div', { class: 'oc-tooltip' }); this.chartAreaEl.appendChild(this._markTip); }
+    if (!this._markTip) { this._markTip = el('div', { class: 'vc-tooltip' }); this.chartAreaEl.appendChild(this._markTip); }
     this._markTip.innerHTML = mark.tooltip.map((t) => `<div>${t.replace(/</g, '&lt;')}</div>`).join('');
     this._markTip.style.left = `${Math.max(0, x - 60)}px`;
     this._markTip.style.top = `${y - 8 - this._markTip.offsetHeight - 24}px`;

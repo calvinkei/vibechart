@@ -1,6 +1,6 @@
 /**
  * Example live datafeed using Binance public market data (no API key).
- * Implements the TradingView-compatible Datafeed interface consumed by OpenChart.
+ * Implements the TradingView-compatible Datafeed interface consumed by VibeChart.
  */
 import type { Bar, Datafeed, DatafeedConfiguration, PeriodParams, ResolutionString, SearchSymbolResultItem, SymbolInfo } from '../src/data/types';
 

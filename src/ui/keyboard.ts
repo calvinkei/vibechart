@@ -34,12 +34,12 @@ export function shortcutSections(): ShortcutSection[] {
 }
 
 export function showShortcutsDialog(chart: Chart): Dialog {
-  const dlg = new Dialog({ title: 'Keyboard shortcuts', container: chart.root, width: 640, className: 'oc-shortcuts-dialog' });
-  const grid = el('div', { class: 'oc-shortcuts' });
+  const dlg = new Dialog({ title: 'Keyboard shortcuts', container: chart.root, width: 640, className: 'vc-shortcuts-dialog' });
+  const grid = el('div', { class: 'vc-shortcuts' });
   for (const s of shortcutSections()) {
-    const col = el('div', { class: 'oc-shortcuts-col' });
+    const col = el('div', { class: 'vc-shortcuts-col' });
     col.appendChild(el('h4', { text: s.title }));
-    for (const [label, keys] of s.items) col.appendChild(el('div', { class: 'oc-shortcut-row' }, [el('span', { text: label }), el('kbd', { class: 'oc-kbd', text: keys })]));
+    for (const [label, keys] of s.items) col.appendChild(el('div', { class: 'vc-shortcut-row' }, [el('span', { text: label }), el('kbd', { class: 'vc-kbd', text: keys })]));
     grid.appendChild(col);
   }
   dlg.body.appendChild(grid);

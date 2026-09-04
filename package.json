@@ -1,17 +1,20 @@
 {
-  "name": "openchart",
+  "name": "vibechart",
   "version": "0.1.0",
-  "description": "Open-source, dependency-free TradingView-style charting library in pure JavaScript/TypeScript (Canvas 2D): 18 chart types, 90+ drawing tools, 170+ indicators, lazy loading, multi-pane, themes, full UI.",
-  "type": "module",
-  "main": "./dist/openchart.umd.js",
-  "module": "./dist/openchart.js",
+  "description": "Dependency-free, framework-free financial charting library in pure TypeScript/Canvas 2D: 18 chart types, 91 drawing tools, 173 technical indicators, lazy history loading, multi-pane layouts, themes and a full trading-terminal UI. TradingView-compatible datafeed API.",
+  "main": "./dist/vibechart.cjs",
+  "module": "./dist/vibechart.mjs",
   "types": "./dist/index.d.ts",
+  "unpkg": "./dist/vibechart.umd.js",
+  "jsdelivr": "./dist/vibechart.umd.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/openchart.js",
-      "require": "./dist/openchart.umd.js"
-    }
+      "import": "./dist/vibechart.mjs",
+      "require": "./dist/vibechart.cjs",
+      "default": "./dist/vibechart.mjs"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
@@ -24,24 +27,40 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepublishOnly": "npm run build && npm test"
   },
   "keywords": [
     "chart",
     "charting",
+    "charting-library",
     "trading",
     "candlestick",
+    "candlestick-chart",
+    "financial-charts",
+    "stock-chart",
     "tradingview",
     "canvas",
     "technical-analysis",
     "indicators",
     "drawing-tools",
-    "finance"
+    "finance",
+    "typescript",
+    "no-dependencies"
   ],
+  "author": "Calvin Kei",
   "license": "MIT",
-  "sideEffects": [
-    "**/*.css"
-  ],
+  "homepage": "https://github.com/calvinkei/vibechart#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/calvinkei/vibechart.git"
+  },
+  "bugs": {
+    "url": "https://github.com/calvinkei/vibechart/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "devDependencies": {
     "typescript": "^5.6.0",
     "vite": "^6.0.0",

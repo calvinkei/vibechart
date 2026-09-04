@@ -1,8 +1,14 @@
-# OpenChart
+# VibeChart
 
-An open-source, dependency-free clone of the TradingView Charting Library. Pure TypeScript compiled to plain JavaScript (ESM + UMD), Canvas 2D rendering, no React/Vue/framework dependencies, **zero runtime dependencies**.
+[![npm](https://img.shields.io/npm/v/vibechart.svg)](https://www.npmjs.com/package/vibechart)
+[![license](https://img.shields.io/npm/l/vibechart.svg)](./LICENSE)
+[![dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](./package.json)
 
-> Status: feature-complete first release. **18 chart types, 91 drawing tools, 173 built-in indicators**, lazy loading, realtime updates, multi-pane, compare symbols, bar replay, marks, themes and the full TradingView-style UI (toolbars, dialogs, context menus) — all in a single dependency-free bundle (~180 KB gzipped).
+A full-featured, open-source financial charting library in pure TypeScript. Canvas 2D rendering, no React/Vue/framework requirement, **zero runtime dependencies**. Ships ESM, CJS and UMD builds with TypeScript types.
+
+> **18 chart types, 91 drawing tools, 173 built-in indicators**, lazy history loading, realtime updates, multi-pane layouts, compare symbols, bar replay, marks, light/dark themes and a complete trading-terminal UI (toolbars, dialogs, context menus) — in one dependency-free bundle (~198 KB gzipped UMD).
+
+It implements the TradingView datafeed contract, so an existing TradingView `IBasicDataFeed` adapter works unchanged. VibeChart is an independent project and is not affiliated with or endorsed by TradingView.
 
 ## Features
 
@@ -15,13 +21,43 @@ An open-source, dependency-free clone of the TradingView Charting Library. Pure 
 - **Indicators (173)**: TradingView's built-in set with the same names, inputs, defaults, colours and levels — moving averages (SMA/EMA/WMA/SMMA/HMA/DEMA/TEMA/VWMA/LSMA/ALMA/KAMA/McGinley, ribbons, crosses, GMMA, TWAP), Bollinger Bands/%B/Width, Keltner, Donchian, Envelope, Ichimoku, Supertrend, Parabolic SAR, ADX/DMI, Aroon, Alligator, Fractals, Zig Zag, Auto Fib, Pivot Points (Traditional/Fibonacci/Woodie/Classic/DM/Camarilla), RSI, Stochastic, Stoch RSI, MACD, CCI, Williams %R, Ultimate/Awesome/Accelerator/Chaikin oscillators, DPO, KST, RVI, Fisher, CMO, BoP, SMI, TSI, Woodies CCI, Connors RSI, Coppock, TRIX, Momentum/ROC/PPO/PMO, ATR, HV, StdDev/StdErr, Mass Index, Choppiness, Chop Zone, Vortex, volume (OBV, A/D, CMF, MFI, EOM, PVT, Klinger, Force Index, Net/Up-Down/Delta/Cumulative Delta, 24h, RVOL), VWAP (session/week/month/… anchors, bands, auto-anchored, rolling), Volume Profile (visible range, fixed range, session, periodic, auto-anchored), 40 candlestick-pattern studies, Technical Ratings, Gaps, Divergence, Median and more — with Inputs/Style/Visibility dialogs and a Pine-like `ta` primitive library.
 - **UI**: top toolbar (symbol search, intervals with favorites, chart types, indicators, templates, undo/redo, settings, fullscreen, snapshot), left drawing toolbar with grouped flyouts and favorites, floating drawing toolbar, context menus, chart settings dialog (Symbol/Status line/Scales/Appearance…), bottom bar (date ranges, timezone, %/log/auto), light & dark themes, save/load layouts, screenshots.
 
-## Install / build
+## Install
 
 ```bash
+npm install vibechart
+```
+
+No CSS import is needed — styles are inlined in the bundle and injected on first use.
+
+```js
+import { Chart, SampleDatafeed } from 'vibechart';
+```
+
+CommonJS (`const { Chart } = require('vibechart')`) and a browser `<script>` tag both work:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/vibechart/dist/vibechart.umd.js"></script>
+<script>
+  const chart = new VibeChart.Chart({ container: '#chart', datafeed: new VibeChart.SampleDatafeed(), symbol: 'BTCUSD' });
+</script>
+```
+
+| Build | File | Entry |
+| --- | --- | --- |
+| ESM | `dist/vibechart.mjs` | `import` |
+| CommonJS | `dist/vibechart.cjs` | `require` |
+| UMD (global `VibeChart`) | `dist/vibechart.umd.js` | `<script>`, CDN |
+| Types | `dist/index.d.ts` | TypeScript |
+
+## Develop
+
+```bash
+git clone https://github.com/calvinkei/vibechart.git
+cd vibechart
 npm install
 npm run dev      # demo at http://localhost:5180
-npm run build    # dist/openchart.js (ESM), dist/openchart.umd.js, dist/index.d.ts
-npm test
+npm run build    # dist/ (ESM + CJS + UMD + types)
+npm test         # 668 unit tests
 ```
 
 ## Usage
@@ -29,7 +65,7 @@ npm test
 ```html
 <div id="chart" style="height: 600px"></div>
 <script type="module">
-  import { Chart, SampleDatafeed } from './dist/openchart.js';
+  import { Chart, SampleDatafeed } from 'vibechart';
   const chart = new Chart({
     container: '#chart',
     datafeed: new SampleDatafeed(),   // or your own TradingView-compatible datafeed
@@ -43,7 +79,7 @@ npm test
 </script>
 ```
 
-UMD build exposes `window.OpenChart`.
+UMD build exposes `window.VibeChart`.
 
 ### Datafeed
 
@@ -74,7 +110,7 @@ const datafeed = {
 ## Extending
 
 ```ts
-import { registerIndicator, plotStyle, registerDrawingTool, Drawing } from 'openchart';
+import { registerIndicator, plotStyle, registerDrawingTool, Drawing } from 'vibechart';
 
 registerIndicator({
   id: 'My Indicator', name: 'My Indicator', shortName: 'MYI', overlay: true,

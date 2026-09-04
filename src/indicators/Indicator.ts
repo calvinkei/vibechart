@@ -214,7 +214,7 @@ export class IndicatorInstance extends DataSource {
     } catch (e) {
       this.error = (e as Error).message;
       this.results = {};
-      console.error(`[openchart] indicator "${this.def.name}" failed`, e);
+      console.error(`[vibechart] indicator "${this.def.name}" failed`, e);
     }
     this.computedFor = ctx.n;
   }

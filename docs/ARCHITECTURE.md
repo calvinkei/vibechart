@@ -1,4 +1,4 @@
-# OpenChart architecture
+# VibeChart architecture
 
 Zero-dependency TradingView-style charting library (TypeScript → ESM/UMD, Canvas 2D).
 
