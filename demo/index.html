@@ -10,6 +10,11 @@
     #controls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 8px; background: #fff; border-bottom: 1px solid #e0e3eb; font-size: 12px; }
     #controls select, #controls button, #controls input { font: inherit; height: 26px; }
     #chart { flex: 1 1 auto; min-height: 0; }
+    @media (max-width: 640px) {
+      #controls { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+      #controls::-webkit-scrollbar { display: none; }
+      #controls label, #controls button, #controls span { flex: 0 0 auto; white-space: nowrap; }
+    }
     .dark { background: #131722; }
     .dark #controls { background: #1e222d; color: #d1d4dc; border-color: #2a2e39; }
   </style>

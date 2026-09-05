@@ -156,7 +156,10 @@ export function createTopToolbar(chart: Chart): { render(): void; updateUndoRedo
       parent.appendChild(b);
     }
     const inFavs = favs.includes(cur);
-    const dd = button(inFavs ? '' : parseResolution(cur).label, { className: `vc-interval-dd ${inFavs ? 'vc-icon-btn' : 'vc-active'}` });
+    // The label is always rendered; CSS hides it while the interval is visible as a quick button,
+    // and shows it again in compact mode when the quick buttons are gone.
+    const dd = button('', { className: `vc-interval-dd ${inFavs ? 'vc-icon-btn vc-in-favs' : 'vc-active'}` });
+    dd.appendChild(el('span', { class: 'vc-dd-label', text: parseResolution(cur).label }));
     dd.appendChild(chevron());
     tooltip(dd, `Time interval — ${parseResolution(cur).name}`, root);
     dropdown(dd, root, intervalMenuItems);
@@ -185,7 +188,7 @@ export function createTopToolbar(chart: Chart): { render(): void; updateUndoRedo
     for (const f of favs) {
       const info = CHART_TYPES.find((c) => c.type === f);
       if (!info) continue;
-      const b = iconBtn(info.icon, info.name, () => chart.setChartType(info.type), f === cur ? 'vc-active' : '');
+      const b = iconBtn(info.icon, info.name, () => chart.setChartType(info.type), `vc-tb-hide-compact ${f === cur ? 'vc-active' : ''}`);
       parent.appendChild(b);
     }
     const info = chartTypeInfo(cur);
@@ -229,6 +232,47 @@ export function createTopToolbar(chart: Chart): { render(): void; updateUndoRedo
     ];
   }
 
+  // ---- responsive collapse ----------------------------------------------------------------------
+  // Everything that compact/mini mode hides is reachable again from the "More" menu, so a narrow
+  // chart loses no capability, only chrome. Items are tagged with the mode that hides them:
+  //   vc-tb-hide-compact  quick chart-type favourites, templates, alert, replay
+  //   vc-tb-hide-mini     compare and the entire right group
+  function moreItems(): MenuItem[] {
+    const o = chart.options.toolbar;
+    const mini = host.classList.contains('vc-tb-mini');
+    const items: MenuItem[] = [];
+    if (mini && o.symbolSearch && o.compare) items.push({ label: 'Compare or add symbol', icon: 'compare', onClick: () => openDialog(chart, 'compare') });
+    if (o.templates) items.push({ label: 'Indicator templates', icon: 'templates', onClick: () => openDialog(chart, 'templates') });
+    if (o.alert) items.push({ label: 'Create alert', icon: 'alert', shortcut: `${altKey()}+A`, onClick: () => toast(root, 'Alerts are not available in this build') });
+    if (o.replay) items.push({ label: 'Bar replay', icon: 'replay', onClick: () => chart.events.emit('openDialog', { type: 'replay' }) });
+    if (!mini) return items;
+    if (items.length) items.push({ separator: true });
+    if (o.undoRedo) {
+      items.push({ label: 'Undo', icon: 'undo', shortcut: `${modKey()}+Z`, disabled: !chart.drawings.canUndo, onClick: () => chart.undo() });
+      items.push({ label: 'Redo', icon: 'redo', shortcut: `${modKey()}+Y`, disabled: !chart.drawings.canRedo, onClick: () => chart.redo() });
+      items.push({ separator: true });
+    }
+    items.push({ label: 'Object tree', icon: 'objectTree', onClick: () => openDialog(chart, 'objectTree') });
+    if (o.settings) items.push({ label: 'Chart settings', icon: 'settings', shortcut: `${modKey()}+,`, onClick: () => openDialog(chart, 'chartSettings') });
+    if (o.fullscreen) items.push({ label: document.fullscreenElement === root ? 'Exit fullscreen' : 'Fullscreen mode', icon: 'fullscreen', onClick: () => chart.fullscreen() });
+    if (o.screenshot) { items.push({ separator: true }); items.push(...snapshotItems()); items.push({ separator: true }); }
+    const theme = chart.options.theme;
+    items.push({ label: theme === 'dark' ? 'Light theme' : 'Dark theme', icon: theme === 'dark' ? 'light' : 'dark', onClick: () => chart.setTheme(theme === 'dark' ? 'light' : 'dark') });
+    return items;
+  }
+
+  let leftEl: HTMLElement | null = null;
+  /** Start from the full layout and step down until the left group no longer overflows. */
+  function relayout(): void {
+    if (!leftEl) return;
+    host.classList.remove('vc-tb-compact', 'vc-tb-mini');
+    const overflowing = () => leftEl!.scrollWidth > leftEl!.clientWidth + 1;
+    if (overflowing()) host.classList.add('vc-tb-compact');
+    if (overflowing()) host.classList.add('vc-tb-mini');
+  }
+  const resizeObserver = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => relayout()) : null;
+  resizeObserver?.observe(host);
+
   // ---- render -------------------------------------------------------------------------------------
   function render(): void {
     host.innerHTML = '';
@@ -236,12 +280,14 @@ export function createTopToolbar(chart: Chart): { render(): void; updateUndoRedo
     const o = chart.options.toolbar;
     const left = el('div', { class: 'vc-tb-group vc-tb-left' });
     const right = el('div', { class: 'vc-tb-group vc-tb-right' });
+    leftEl = left;
+    const hideMini = (node: HTMLElement): HTMLElement => { node.classList.add('vc-tb-hide-mini'); return node; };
 
     if (o.symbolSearch) {
       const sym = button(chart.symbol || 'Symbol', { icon: 'search', className: 'vc-symbol-btn', onClick: () => openDialog(chart, 'symbolSearch') });
       tooltip(sym, () => { const i = chart.symbolInfo; return i ? `${i.description}${i.exchange ? ` · ${i.exchange}` : ''} (${modKey()}+K)` : `Symbol search (${modKey()}+K)`; }, root);
       left.appendChild(sym);
-      if (o.compare) left.appendChild(iconBtn('compare', 'Compare or add symbol', () => openDialog(chart, 'compare')));
+      if (o.compare) left.appendChild(iconBtn('compare', 'Compare or add symbol', () => openDialog(chart, 'compare'), 'vc-tb-hide-mini'));
       left.appendChild(sep());
     }
     if (o.intervals) { renderIntervals(left); left.appendChild(sep()); }
@@ -251,35 +297,39 @@ export function createTopToolbar(chart: Chart): { render(): void; updateUndoRedo
       tooltip(b, 'Indicators, metrics & strategies ( / )', root);
       left.appendChild(b);
     }
-    if (o.templates) left.appendChild(iconBtn('templates', 'Indicator templates', () => openDialog(chart, 'templates')));
-    if (o.alert) left.appendChild(iconBtn('alert', `Create alert (${altKey()}+A)`, () => toast(root, 'Alerts are not available in this build')));
-    if (o.replay) left.appendChild(iconBtn('replay', 'Bar replay', () => chart.events.emit('openDialog', { type: 'replay' })));
+    if (o.templates) left.appendChild(iconBtn('templates', 'Indicator templates', () => openDialog(chart, 'templates'), 'vc-tb-hide-compact'));
+    if (o.alert) left.appendChild(iconBtn('alert', `Create alert (${altKey()}+A)`, () => toast(root, 'Alerts are not available in this build'), 'vc-tb-hide-compact'));
+    if (o.replay) left.appendChild(iconBtn('replay', 'Bar replay', () => chart.events.emit('openDialog', { type: 'replay' }), 'vc-tb-hide-compact'));
 
     if (o.undoRedo) {
-      undoBtn = iconBtn('undo', `Undo (${modKey()}+Z)`, () => chart.undo());
-      redoBtn = iconBtn('redo', `Redo (${modKey()}+Y)`, () => chart.redo());
+      undoBtn = iconBtn('undo', `Undo (${modKey()}+Z)`, () => chart.undo(), 'vc-tb-hide-mini');
+      redoBtn = iconBtn('redo', `Redo (${modKey()}+Y)`, () => chart.redo(), 'vc-tb-hide-mini');
       right.appendChild(undoBtn);
       right.appendChild(redoBtn);
-      right.appendChild(sep());
+      right.appendChild(hideMini(sep()));
       updateUndoRedo();
     }
-    right.appendChild(iconBtn('objectTree', 'Object tree', () => openDialog(chart, 'objectTree')));
-    if (o.settings) right.appendChild(iconBtn('settings', `Chart settings (${modKey()}+,)`, () => openDialog(chart, 'chartSettings')));
+    right.appendChild(iconBtn('objectTree', 'Object tree', () => openDialog(chart, 'objectTree'), 'vc-tb-hide-mini'));
+    if (o.settings) right.appendChild(iconBtn('settings', `Chart settings (${modKey()}+,)`, () => openDialog(chart, 'chartSettings'), 'vc-tb-hide-mini'));
     if (o.fullscreen) {
-      fsBtn = iconBtn('fullscreen', 'Fullscreen mode', () => chart.fullscreen());
+      fsBtn = iconBtn('fullscreen', 'Fullscreen mode', () => chart.fullscreen(), 'vc-tb-hide-mini');
       right.appendChild(fsBtn);
       onFullscreen();
     }
     if (o.screenshot) {
-      const snap = iconBtn('camera', 'Take a snapshot', () => { /* dropdown */ });
+      const snap = iconBtn('camera', 'Take a snapshot', () => { /* dropdown */ }, 'vc-tb-hide-mini');
       dropdown(snap, root, snapshotItems, { align: 'right' });
       right.appendChild(snap);
     }
     const theme = chart.options.theme;
-    right.appendChild(iconBtn(theme === 'dark' ? 'light' : 'dark', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme', () => chart.setTheme(theme === 'dark' ? 'light' : 'dark')));
+    right.appendChild(iconBtn(theme === 'dark' ? 'light' : 'dark', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme', () => chart.setTheme(theme === 'dark' ? 'light' : 'dark'), 'vc-tb-hide-mini'));
+    const more = iconBtn('moreHoriz', 'More', () => { /* dropdown */ }, 'vc-tb-more');
+    dropdown(more, root, moreItems, { align: 'right' });
+    right.appendChild(more);
 
     host.appendChild(left);
     host.appendChild(right);
+    relayout();
   }
 
   function updateUndoRedo(): void {
@@ -292,6 +342,7 @@ export function createTopToolbar(chart: Chart): { render(): void; updateUndoRedo
     updateUndoRedo,
     destroy() {
       document.removeEventListener('fullscreenchange', onFullscreen);
+      resizeObserver?.disconnect();
       host.innerHTML = '';
     },
   };

@@ -13,18 +13,25 @@ import { openDialog } from './dialogs/index';
 import { isResolutionSupported } from './topToolbar';
 import { altKey, timezoneMenuItems } from './util';
 
-export interface DateRange { label: string; title: string; res: ResolutionString; days: number | 'ytd' | 'all' }
+export interface DateRange {
+  label: string;
+  title: string;
+  res: ResolutionString;
+  days: number | 'ytd' | 'all';
+  /** Hidden first when the bar is too narrow to show every range. */
+  secondary?: boolean;
+}
 
 /** TradingView bottom-bar ranges and the resolution each one switches to. */
 export const DATE_RANGES: DateRange[] = [
   { label: '1D', title: '1 day in 1 minute intervals', res: '1', days: 1 },
-  { label: '5D', title: '5 days in 5 minute intervals', res: '5', days: 5 },
+  { label: '5D', title: '5 days in 5 minute intervals', res: '5', days: 5, secondary: true },
   { label: '1M', title: '1 month in 30 minute intervals', res: '30', days: 30 },
   { label: '3M', title: '3 months in 1 hour intervals', res: '60', days: 91 },
-  { label: '6M', title: '6 months in 2 hour intervals', res: '120', days: 182 },
-  { label: 'YTD', title: 'Year to date in 1 day intervals', res: '1D', days: 'ytd' },
+  { label: '6M', title: '6 months in 2 hour intervals', res: '120', days: 182, secondary: true },
+  { label: 'YTD', title: 'Year to date in 1 day intervals', res: '1D', days: 'ytd', secondary: true },
   { label: '1Y', title: '1 year in 1 day intervals', res: '1D', days: 365 },
-  { label: '5Y', title: '5 years in 1 week intervals', res: '1W', days: 5 * 365 },
+  { label: '5Y', title: '5 years in 1 week intervals', res: '1W', days: 5 * 365, secondary: true },
   { label: 'All', title: 'All data in 1 month intervals', res: '1M', days: 'all' },
 ];
 
@@ -121,14 +128,26 @@ export function createBottomBar(chart: Chart): BottomBar {
     scaleUnsub = mainScale().changed.subscribe(updateScaleButtons);
   }
 
+  let leftEl: HTMLElement | null = null;
+  /** Drop the secondary ranges when the range row overflows; whatever still overflows scrolls. */
+  function relayout(): void {
+    if (!leftEl) return;
+    host.classList.remove('vc-bb-compact');
+    if (leftEl.scrollWidth > leftEl.clientWidth + 1) host.classList.add('vc-bb-compact');
+  }
+  const resizeObserver = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => relayout()) : null;
+  resizeObserver?.observe(host);
+
   function render(): void {
     host.innerHTML = '';
     rangeBtns = [];
     const o = chart.options;
     const left = el('div', { class: 'vc-bb-left' });
+    leftEl = left;
     if (o.navigation.dateRanges) {
       for (const r of DATE_RANGES) {
         const b = el('button', { class: 'vc-range-btn', text: r.label, title: r.title });
+        if (r.secondary) b.dataset.prio = '2';
         b.addEventListener('click', () => { void applyRange(r); });
         rangeBtns.push(b);
         left.appendChild(b);
@@ -159,6 +178,7 @@ export function createBottomBar(chart: Chart): BottomBar {
     updateClock();
     updateScaleButtons();
     bindScale();
+    relayout();
   }
 
   const timer = window.setInterval(updateClock, 1000);
@@ -174,6 +194,7 @@ export function createBottomBar(chart: Chart): BottomBar {
     update() { updateClock(); updateScaleButtons(); },
     destroy() {
       clearInterval(timer);
+      resizeObserver?.disconnect();
       scaleUnsub?.();
       for (const u of unsubs) u();
       host.innerHTML = '';

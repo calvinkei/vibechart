@@ -496,12 +496,15 @@ export class PriceAxisView {
         labels.push({ y, text: lab.text || srcScale.formatPrice(lab.price), bg: lab.bg, color: lab.color || contrastText(lab.bg), sub });
       }
     }
-    // avoid overlaps: sort by y and push apart
+    // avoid overlaps: sort by y and push apart. A label with a countdown line is drawn twice as
+    // tall, so the gap has to come from the previous label's real bottom edge, not a fixed pitch.
     labels.sort((a, b) => a.y - b.y);
-    const boxH = o.layout.fontSize + 6;
+    const lineH = o.layout.fontSize + 6;
+    const boxHeight = (l: { sub?: string }) => (l.sub ? lineH * 2 - 2 : lineH);
     if (ps.options.alignLabels) {
       for (let i = 1; i < labels.length; i++) {
-        if (labels[i].y - labels[i - 1].y < boxH) labels[i].y = labels[i - 1].y + boxH;
+        const prevBottom = labels[i - 1].y - lineH / 2 + boxHeight(labels[i - 1]);
+        if (labels[i].y - lineH / 2 < prevBottom) labels[i].y = prevBottom + lineH / 2;
       }
     }
     for (const lab of labels) this._drawLabel(ctx, lab.y, lab.text, lab.bg, lab.color, lab.sub);

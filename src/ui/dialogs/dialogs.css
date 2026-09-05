@@ -63,7 +63,7 @@
 .vc-sym-radios label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
 
 /* Object tree */
-.vc-object-tree { width: 320px; max-height: 80%; }
+.vc-object-tree { width: min(320px, 100%); max-height: 80%; }
 .vc-object-tree .vc-dialog-body { padding: 6px 8px; }
 .vc-tree-section { padding: 6px 8px 2px; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--vc-text2); }
 .vc-tree-row { position: relative; }

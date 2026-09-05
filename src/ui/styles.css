@@ -2,7 +2,7 @@
 .vc-root.vc-theme-dark { color: #d1d4dc; background: #131722; --vc-bg: #131722; --vc-bg2: #1e222d; --vc-bg3: #2a2e39; --vc-text: #d1d4dc; --vc-text2: #787b86; --vc-border: #2a2e39; --vc-accent: #2962ff; --vc-hover: #2a2e39; --vc-active: #1e3a8a; --vc-shadow: 0 2px 4px rgba(0,0,0,.5); }
 .vc-root *, .vc-root *::before, .vc-root *::after { box-sizing: border-box; }
 .vc-root button { font: inherit; color: inherit; }
-.vc-top-toolbar { display: flex; align-items: center; flex: 0 0 auto; min-height: 38px; border-bottom: 1px solid var(--vc-border); background: var(--vc-bg); padding: 0 6px; gap: 2px; }
+.vc-top-toolbar { display: flex; align-items: center; flex: 0 0 auto; min-height: 38px; overflow: hidden; border-bottom: 1px solid var(--vc-border); background: var(--vc-bg); padding: 0 6px; gap: 2px; }
 .vc-top-toolbar:empty { display: none; }
 .vc-body { display: flex; flex: 1 1 auto; min-height: 0; }
 .vc-left-toolbar { display: flex; flex-direction: column; flex: 0 0 auto; width: 40px; border-right: 1px solid var(--vc-border); background: var(--vc-bg); overflow: visible; }
@@ -21,19 +21,19 @@
 .vc-axis-spacer { flex: 0 0 auto; }
 .vc-time-axis { position: relative; flex: 1 1 auto; overflow: hidden; }
 .vc-time-axis canvas { display: block; }
-.vc-bottom-bar { display: flex; align-items: center; flex: 0 0 auto; min-height: 26px; border-top: 1px solid var(--vc-border); background: var(--vc-bg); padding: 0 6px; font-size: 11px; gap: 4px; }
+.vc-bottom-bar { display: flex; align-items: center; flex: 0 0 auto; min-height: 26px; overflow: hidden; border-top: 1px solid var(--vc-border); background: var(--vc-bg); padding: 0 6px; font-size: 11px; gap: 4px; }
 .vc-bottom-bar:empty { display: none; }
 .vc-overlay { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 50; }
 /* legend */
 .vc-legend { position: absolute; left: 6px; top: 4px; z-index: 4; display: flex; flex-direction: column; gap: 1px; pointer-events: none; font-size: 12px; line-height: 18px; max-width: calc(100% - 60px); }
-.vc-legend-row { display: flex; align-items: center; gap: 6px; padding: 1px 4px; border-radius: 4px; pointer-events: auto; white-space: nowrap; color: var(--vc-text); }
+.vc-legend-row { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; padding: 1px 4px; border-radius: 4px; pointer-events: auto; white-space: nowrap; color: var(--vc-text); }
 .vc-legend-row:hover { background: var(--vc-bg2); }
 .vc-legend-hidden .vc-legend-title, .vc-legend-hidden .vc-legend-values { opacity: .4; }
 .vc-legend-title { font-weight: 600; cursor: default; }
 .vc-legend-main .vc-legend-title { font-size: 14px; }
 .vc-legend-desc, .vc-legend-args, .vc-legend-int, .vc-legend-exch { font-weight: 400; color: var(--vc-text2); }
 .vc-legend-int { margin-left: 2px; }
-.vc-legend-values { display: flex; gap: 6px; }
+.vc-legend-values { display: flex; flex-wrap: wrap; gap: 2px 6px; }
 .vc-legend-item { display: inline-flex; gap: 3px; }
 .vc-legend-label { color: var(--vc-text2); }
 .vc-legend-buttons { display: none; gap: 0; margin-left: 2px; }
@@ -69,19 +69,20 @@
 .vc-menu-item svg { width: 18px; height: 18px; fill: currentColor; flex: 0 0 auto; }
 /* dialogs */
 .vc-dialog-backdrop { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.35); display: flex; align-items: center; justify-content: center; }
-.vc-dialog { background: var(--vc-bg); color: var(--vc-text); border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,.35); min-width: 420px; max-width: 92vw; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; font-size: 13px; }
+.vc-dialog { background: var(--vc-bg); color: var(--vc-text); border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,.35); min-width: min(420px, 94vw); max-width: 94vw; max-height: 92vh; display: flex; flex-direction: column; overflow: hidden; font-size: 13px; }
 .vc-dialog-header { display: flex; align-items: center; padding: 12px 16px; font-size: 16px; font-weight: 600; border-bottom: 1px solid var(--vc-border); cursor: move; }
 .vc-dialog-close { margin-left: auto; border: 0; background: transparent; cursor: pointer; width: 28px; height: 28px; border-radius: 4px; color: var(--vc-text2); }
 .vc-dialog-close:hover { background: var(--vc-hover); color: var(--vc-text); }
 .vc-dialog-body { flex: 1 1 auto; overflow: auto; padding: 8px 16px; min-height: 120px; }
 .vc-dialog-footer { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--vc-border); justify-content: flex-end; align-items: center; }
 .vc-dialog-footer .vc-left { margin-right: auto; }
-.vc-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--vc-border); padding: 0 16px; }
-.vc-tab { padding: 10px 12px; border: 0; background: transparent; cursor: pointer; color: var(--vc-text2); border-bottom: 2px solid transparent; font-weight: 600; }
+.vc-tabs { display: flex; flex: 0 0 auto; gap: 4px; border-bottom: 1px solid var(--vc-border); padding: 0 16px; overflow-x: auto; scrollbar-width: none; }
+.vc-tabs::-webkit-scrollbar { display: none; }
+.vc-tab { flex: 0 0 auto; white-space: nowrap; padding: 10px 12px; border: 0; background: transparent; cursor: pointer; color: var(--vc-text2); border-bottom: 2px solid transparent; font-weight: 600; }
 .vc-tab.vc-active { color: var(--vc-text); border-bottom-color: var(--vc-accent); }
 .vc-form-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; min-height: 34px; }
-.vc-form-row > label { flex: 0 0 180px; color: var(--vc-text); }
-.vc-form-row .vc-control { display: flex; align-items: center; gap: 6px; flex: 1 1 auto; }
+.vc-form-row > label { flex: 0 0 min(180px, 38%); color: var(--vc-text); }
+.vc-form-row .vc-control { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; flex: 1 1 auto; min-width: 0; }
 .vc-form-section { margin-top: 10px; padding: 6px 0 2px; font-weight: 600; color: var(--vc-text2); text-transform: uppercase; font-size: 11px; border-bottom: 1px solid var(--vc-border); }
 .vc-input, .vc-select { height: 28px; padding: 0 8px; border: 1px solid var(--vc-border); border-radius: 4px; background: var(--vc-bg); color: var(--vc-text); font: inherit; min-width: 80px; }
 .vc-input:focus, .vc-select:focus { outline: none; border-color: var(--vc-accent); }
@@ -123,7 +124,7 @@
 .vc-chart-area:hover .vc-nav-buttons { display: flex; }
 .vc-nav-btn { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--vc-border); background: var(--vc-bg); color: var(--vc-text2); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; box-shadow: var(--vc-shadow); }
 .vc-nav-btn:hover { color: var(--vc-text); }
-.vc-object-tree { min-width: 320px; }
+.vc-object-tree { min-width: min(320px, 90vw); }
 .vc-tree-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 4px; cursor: pointer; }
 .vc-tree-row:hover { background: var(--vc-hover); }
 .vc-tree-row.vc-active { background: var(--vc-active); }
@@ -145,6 +146,7 @@
 .vc-top-toolbar .vc-btn.vc-active:hover { background: var(--vc-hover); }
 .vc-symbol-btn { font-weight: 700; font-size: 14px; }
 .vc-symbol-btn .vc-icon { color: var(--vc-text2); }
+.vc-symbol-btn > span:not(.vc-icon) { max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
 .vc-interval-btn { padding: 0 6px; min-width: 30px; font-weight: 600; }
 .vc-interval-dd { padding: 0 4px 0 6px; font-weight: 600; }
 .vc-interval-dd.vc-icon-btn { padding: 0 2px; min-width: 20px; }
@@ -220,7 +222,31 @@
 .vc-nav-btn svg { width: 18px; height: 18px; fill: currentColor; }
 .vc-nav-btn.vc-nav-realtime { color: var(--vc-accent); }
 /* ---- shortcuts dialog ---- */
-.vc-shortcuts { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 28px; padding: 4px 0 8px; }
+.vc-shortcuts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 4px 28px; padding: 4px 0 8px; }
 .vc-shortcuts h4 { margin: 8px 0 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--vc-text2); }
 .vc-shortcut-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 3px 0; }
 .vc-shortcut-row .vc-kbd { white-space: nowrap; }
+/* ---- responsive chrome ----
+   The toolbar measures itself (ResizeObserver in topToolbar.ts) and adds .vc-tb-compact when its
+   content overflows, then .vc-tb-mini when it still does. Compact hides the quick-interval and
+   chart-type favourites and the "Indicators" label; mini moves the whole right group into the
+   "More" menu, like the TradingView mobile header. Nothing in the left group may shrink, so a
+   squeezed button can never overlap its neighbour. */
+.vc-tb-left > * { flex: 0 0 auto; }
+.vc-tb-more { display: none; }
+.vc-tb-compact .vc-tb-more { display: inline-flex; }
+.vc-tb-compact .vc-interval-btn, .vc-tb-compact .vc-tb-hide-compact { display: none; }
+.vc-interval-dd.vc-in-favs .vc-dd-label { display: none; }
+.vc-tb-compact .vc-interval-dd.vc-in-favs .vc-dd-label { display: inline; }
+.vc-tb-compact .vc-interval-dd.vc-in-favs { padding: 0 4px 0 6px; min-width: 0; color: var(--vc-accent); }
+.vc-tb-compact .vc-indicators-btn > span:not(.vc-icon) { display: none; }
+.vc-tb-compact .vc-indicators-btn { padding: 0 5px; }
+.vc-tb-mini .vc-tb-hide-mini { display: none; }
+/* bottom bar: ranges scroll horizontally instead of wrapping the clock; the least-used ranges are
+   dropped first (.vc-bb-compact, set by bottomBar.ts when the bar overflows) */
+.vc-bb-left { flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.vc-bb-left::-webkit-scrollbar { display: none; }
+.vc-bb-right { flex: 0 0 auto; }
+.vc-range-btn { flex: 0 0 auto; white-space: nowrap; }
+.vc-clock-btn { white-space: nowrap; }
+.vc-bb-compact .vc-range-btn[data-prio="2"] { display: none; }
