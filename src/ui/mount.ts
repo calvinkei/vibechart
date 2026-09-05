@@ -14,6 +14,7 @@ import { createContextMenus } from './contextMenus';
 import { createBottomBar } from './bottomBar';
 import { createNavButtons } from './navButtons';
 import { createKeyboard } from './keyboard';
+import { createBottomPanel } from './bottomPanel';
 import { loadPref, toast } from './util';
 
 /** Apply a saved per-tool default style (oc.drawingDefaults.<toolId>) to freshly created drawings. */
@@ -37,6 +38,9 @@ export function mountUI(chart: Chart): { destroy(): void } {
   const floating = createFloatingToolbar(chart);
   const menus = createContextMenus(chart);
   const keys = createKeyboard(chart);
+  // the Python editor / Strategy Tester dock exists only when the chart has a strategy controller
+  let panel = chart.strategy ? createBottomPanel(chart) : null;
+  subs.push(chart.subscribe('strategyEnabled', () => { if (!panel) panel = createBottomPanel(chart); }));
 
   const syncVisibility = (): void => {
     const t = chart.options.toolbar;
@@ -82,6 +86,11 @@ export function mountUI(chart: Chart): { destroy(): void } {
         else showReplayBar(chart);
         return;
       }
+      case 'strategyPanel': {
+        const tab = payload === 'tester' || payload === 'editor' ? payload : undefined;
+        (chart.strategy ?? chart.enableStrategy()).openPanel(tab);
+        return;
+      }
       default:
         openDialog(chart, type, payload);
     }
@@ -91,6 +100,7 @@ export function mountUI(chart: Chart): { destroy(): void } {
     destroy() {
       for (const u of subs) u();
       closeAllMenus();
+      panel?.destroy();
       keys.destroy();
       menus.destroy();
       floating.destroy();

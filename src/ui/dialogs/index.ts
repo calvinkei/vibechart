@@ -5,6 +5,7 @@ import { closeAllDialogs, type Dialog } from '../components';
 import { injectDialogStyles, installDrawingDefaultsHook, ensureIndicatorVisibilityHook } from './shared';
 import { openChartSettings, type ChartSettingsTab } from './chartSettings';
 import { openIndicatorSettings } from './indicatorSettings';
+import { openStrategySettings } from './strategySettings';
 import { openDrawingSettings } from './drawingSettings';
 import { openIndicatorsDialog } from './indicators';
 import { openSymbolSearch } from './symbolSearch';
@@ -25,7 +26,7 @@ import { openTemplates } from './templates';
  *  'templates'
  *  'closeAll'
  */
-export type DialogType = 'chartSettings' | 'indicatorSettings' | 'drawingSettings' | 'indicators' | 'symbolSearch' | 'objectTree' | 'goToDate' | 'templates' | 'compare' | 'closeAll' | string;
+export type DialogType = 'chartSettings' | 'indicatorSettings' | 'drawingSettings' | 'indicators' | 'symbolSearch' | 'objectTree' | 'goToDate' | 'templates' | 'compare' | 'strategySettings' | 'closeAll' | string;
 
 const CHART_TABS = new Set<string>(['symbol', 'statusLine', 'scales', 'appearance', 'trading', 'events', 'volume']);
 /** Modal dialogs we opened (only one modal at a time, like TradingView). */
@@ -51,7 +52,14 @@ export function openDialog(chart: Chart, type: DialogType, payload?: unknown): v
       break;
     }
     case 'indicatorSettings':
-      if (payload instanceof IndicatorInstance) { closeModals(); track(openIndicatorSettings(chart, payload)); }
+      if (payload instanceof IndicatorInstance) {
+        closeModals();
+        // the strategy's chart source opens the strategy dialog (inputs + properties), like TradingView
+        track(chart.strategy && chart.strategy.instance === payload ? openStrategySettings(chart) : openIndicatorSettings(chart, payload));
+      }
+      break;
+    case 'strategySettings':
+      if (chart.strategy) { closeModals(); track(openStrategySettings(chart, payload === 'Properties' || payload === 'Style' ? payload : 'Inputs')); }
       break;
     case 'drawingSettings':
       if (payload instanceof Drawing) { closeModals(); track(openDrawingSettings(chart, payload)); }
@@ -67,7 +75,7 @@ export function openDialog(chart: Chart, type: DialogType, payload?: unknown): v
   }
 }
 
-export { openChartSettings, openIndicatorSettings, openDrawingSettings, openIndicatorsDialog, openSymbolSearch, openObjectTree, openGoToDate, openTemplates };
+export { openChartSettings, openIndicatorSettings, openDrawingSettings, openIndicatorsDialog, openSymbolSearch, openObjectTree, openGoToDate, openTemplates, openStrategySettings };
 
 // Debug/test hook (harmless in production): window.ocOpenDialog(chart, type, payload)
 if (typeof window !== 'undefined') (window as any).ocOpenDialog = openDialog;

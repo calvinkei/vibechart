@@ -1,7 +1,7 @@
 {
   "name": "vibechart",
-  "version": "0.1.2",
-  "description": "Dependency-free, framework-free financial charting library in pure TypeScript/Canvas 2D: 18 chart types, 91 drawing tools, 173 technical indicators, lazy history loading, multi-pane layouts, themes and a full trading-terminal UI. TradingView-compatible datafeed API.",
+  "version": "0.2.0",
+  "description": "Dependency-free, framework-free financial charting library in pure TypeScript/Canvas 2D: 18 chart types, 91 drawing tools, 173 technical indicators, a Python strategy editor with a TradingView-style Strategy Tester, lazy history loading, multi-pane layouts, themes and a full trading-terminal UI. TradingView-compatible datafeed API.",
   "main": "./dist/vibechart.umd.js",
   "module": "./dist/vibechart.mjs",
   "types": "./dist/index.d.ts",
@@ -46,7 +46,12 @@
     "drawing-tools",
     "finance",
     "typescript",
-    "no-dependencies"
+    "no-dependencies",
+    "backtesting",
+    "strategy-tester",
+    "python",
+    "pyodide",
+    "algo-trading"
   ],
   "author": "Calvin Kei",
   "license": "MIT",

@@ -12,6 +12,8 @@ const chart = new Chart({
   initialBars: Math.min(50000, parseInt(params.get('bars') || '300', 10) || 300), // ?bars=20000 for stress testing
   theme: 'light',
   studies: ['Moving Average Exponential', 'Volume'],
+  // ?strategy=1 opens the Python editor + Strategy Tester dock (Pyodide is fetched from a CDN on first run)
+  strategy: params.has('strategy') ? { enabled: true, open: true, runOnLoad: params.get('strategy') === 'run' } : undefined,
 });
 (window as any).chart = chart;
 

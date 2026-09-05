@@ -18,8 +18,11 @@ import { SampleDatafeed } from '../data/SampleDatafeed';
 import baseCss from '../ui/styles.css?inline';
 import { ReplayController, type ReplayState } from './Replay';
 import type { CompareSeries, CompareStyle } from '../series/CompareSeries';
+import { StrategyController, type SavedStrategy, type StrategyOptions } from '../strategy/StrategyEngine';
 
 export interface ChartConstructorOptions extends Omit<DeepPartial<ChartOptions>, 'symbol'> {
+  /** Python strategy panel (editor + Strategy Tester). Disabled unless `strategy.enabled` is true. */
+  strategy?: StrategyOptions;
   /** Symbol settings tab overrides (ChartOptions.symbol) */
   symbolSettings?: DeepPartial<ChartOptions['symbol']>;
   container: HTMLElement | string;
@@ -47,9 +50,11 @@ export interface SavedChart {
   drawings: SerializedDrawing[];
   panes: Array<{ id: string; weight: number; collapsed: boolean; scales: Record<string, { mode: PriceScaleMode; invert: boolean; auto: boolean }> }>;
   timeScale: { barSpacing: number; rightOffset: number };
+  strategy?: SavedStrategy;
 }
 
 export interface ChartEvents extends Record<string, unknown> {
+  strategyEnabled: StrategyController;
   ready: void;
   symbolChanged: SymbolInfo;
   intervalChanged: ResolutionString;
@@ -132,12 +137,14 @@ export class Chart {
   private _initialBars = 300;
   private _countdownTimer = 0;
   private _replay: ReplayController | null = null;
+  /** Python strategy controller; null unless the chart was created with `strategy.enabled` (or enableStrategy() was called). */
+  strategy: StrategyController | null = null;
 
   constructor(opts: ChartConstructorOptions) {
     const container = typeof opts.container === 'string' ? document.querySelector<HTMLElement>(opts.container) : opts.container;
     if (!container) throw new Error('[vibechart] container not found');
     this.container = container;
-    const { container: _c, datafeed, symbol, interval, chartType, studies, savedData, disableUI, initialBars, symbolSettings, ...optionOverrides } = opts;
+    const { container: _c, datafeed, symbol, interval, chartType, studies, savedData, disableUI, initialBars, symbolSettings, strategy, ...optionOverrides } = opts;
     if (symbolSettings) (optionOverrides as any).symbol = symbolSettings;
     void _c;
     const theme = (optionOverrides.theme as ThemeName) || 'light';
@@ -186,6 +193,7 @@ export class Chart {
       if (this.model.options.symbol.countdownVisible && this.model.bars.length && !this._drag) this._invalidate('cursor');
     }, 1000);
 
+    if (strategy?.enabled) this.strategy = new StrategyController(this, strategy);
     if (chartType !== undefined) this.setChartType(chartType);
     if (savedData) this.load(savedData);
     else {
@@ -204,6 +212,15 @@ export class Chart {
 
   /** Set by the UI module to mount toolbars/dialogs. */
   static uiFactory: ((chart: Chart) => { destroy(): void }) | null = null;
+
+  /** Turn the Python strategy panel on after construction. Returns the controller. */
+  enableStrategy(opts: StrategyOptions = {}): StrategyController {
+    if (!this.strategy) {
+      this.strategy = new StrategyController(this, { ...opts, enabled: true, open: opts.open ?? true });
+      this.events.emit('strategyEnabled', this.strategy);
+    } else if (opts.open !== false) this.strategy.openPanel();
+    return this.strategy;
+  }
 
   // ---- host for views ----------------------------------------------------------
   private _host(): ViewHost {
@@ -492,11 +509,13 @@ export class Chart {
       drawings: this.drawings.serialize(),
       panes: m.panes.map((p) => ({ id: p.id, weight: p.weight, collapsed: p.collapsed, scales: Object.fromEntries(Array.from(p.priceScales.entries()).map(([id, ps]) => [id, { mode: ps.mode, invert: ps.inverted, auto: ps.isAutoScale }])) })),
       timeScale: { barSpacing: m.timeScale.barSpacing, rightOffset: m.options.timeScale.rightOffset },
+      strategy: this.strategy ? this.strategy.save() : undefined,
     };
   }
 
   load(data: SavedChart): void {
     const m = this.model;
+    this.strategy?.remove();
     this.removeAllIndicators();
     this.drawings.load([]);
     m.applyOptions(data.options || {});
@@ -526,6 +545,7 @@ export class Chart {
     }
     this.drawings.load(data.drawings || []);
     if (data.timeScale) m.timeScale.setBarSpacing(data.timeScale.barSpacing);
+    if (data.strategy) (this.strategy ?? this.enableStrategy({ open: data.strategy.panel?.open })).load(data.strategy);
     this._syncPanes();
     this._invalidate('layout');
   }
@@ -545,6 +565,7 @@ export class Chart {
     cancelAnimationFrame(this._raf);
     cancelAnimationFrame(this._kineticRaf);
     this._ui?.destroy();
+    this.strategy?.destroy();
     this._replay?.destroy();
     this.loader.destroy();
     this.model.destroy();

@@ -6,7 +6,7 @@
 
 A full-featured, open-source financial charting library in pure TypeScript. Canvas 2D rendering, no React/Vue/framework requirement, **zero runtime dependencies**. Ships ESM, CJS and UMD builds with TypeScript types.
 
-> **18 chart types, 91 drawing tools, 173 built-in indicators**, lazy history loading, realtime updates, multi-pane layouts, compare symbols, bar replay, marks, light/dark themes and a complete trading-terminal UI (toolbars, dialogs, context menus) — in one dependency-free bundle (~198 KB gzipped UMD).
+> **18 chart types, 91 drawing tools, 173 built-in indicators, a Python strategy editor with a Strategy Tester**, lazy history loading, realtime updates, multi-pane layouts, compare symbols, bar replay, marks, light/dark themes and a complete trading-terminal UI (toolbars, dialogs, context menus) — in one dependency-free bundle (~200 KB gzipped UMD).
 
 It implements the TradingView datafeed contract, so an existing TradingView `IBasicDataFeed` adapter works unchanged. VibeChart is an independent project and is not affiliated with or endorsed by TradingView.
 
@@ -19,6 +19,7 @@ It implements the TradingView datafeed contract, so an existing TradingView `IBa
 - **Datafeed**: TradingView `IBasicDataFeed`-compatible interface (`onReady`, `resolveSymbol`, `searchSymbols`, `getBars` with `periodParams`/`countBack`/`noData`/`nextTime`, `subscribeBars`, `unsubscribeBars`) with lazy history loading while scrolling and realtime updates. A deterministic sample datafeed is included for demos/tests.
 - **Drawing tools (91)**: the TradingView catalogue — trend line, ray, info line, extended line, trend angle, horizontal/vertical/cross lines, arrows, parallel/disjoint/regression channels, flat top/bottom; Fibonacci retracement, trend-based extension, channel, time zone, speed/resistance fan & arcs, trend-based time, circles, spiral, wedge; Gann box, square, fixed square, fan; pitchfork (original, Schiff, modified Schiff, inside) and pitchfan; rectangle, rotated rectangle, ellipse, circle, triangle, arc, curve, double curve, polyline, path, brush, highlighter; text, anchored text, note, anchored note, pin, callout, comment, price label, price note, signpost, flag, table, emoji, icons, arrow markers; XABCD, Cypher, ABCD, triangle, three drives, head & shoulders, Elliott impulse/correction/triangle/double & triple combo, cyclic lines, time cycles, sine line; long/short position, forecast, bars pattern, ghost feed, projection, price/date/date-price ranges, anchored VWAP, fixed-range & anchored volume profile, measure — with per-tool Style/Text/Coordinates/Visibility dialogs, magnet (weak/strong), lock/hide, undo/redo, clone/copy/paste, templates, object tree, keyboard shortcuts.
 - **Indicators (173)**: TradingView's built-in set with the same names, inputs, defaults, colours and levels — moving averages (SMA/EMA/WMA/SMMA/HMA/DEMA/TEMA/VWMA/LSMA/ALMA/KAMA/McGinley, ribbons, crosses, GMMA, TWAP), Bollinger Bands/%B/Width, Keltner, Donchian, Envelope, Ichimoku, Supertrend, Parabolic SAR, ADX/DMI, Aroon, Alligator, Fractals, Zig Zag, Auto Fib, Pivot Points (Traditional/Fibonacci/Woodie/Classic/DM/Camarilla), RSI, Stochastic, Stoch RSI, MACD, CCI, Williams %R, Ultimate/Awesome/Accelerator/Chaikin oscillators, DPO, KST, RVI, Fisher, CMO, BoP, SMI, TSI, Woodies CCI, Connors RSI, Coppock, TRIX, Momentum/ROC/PPO/PMO, ATR, HV, StdDev/StdErr, Mass Index, Choppiness, Chop Zone, Vortex, volume (OBV, A/D, CMF, MFI, EOM, PVT, Klinger, Force Index, Net/Up-Down/Delta/Cumulative Delta, 24h, RVOL), VWAP (session/week/month/… anchors, bands, auto-anchored, rolling), Volume Profile (visible range, fixed range, session, periodic, auto-anchored), 40 candlestick-pattern studies, Technical Ratings, Gaps, Divergence, Median and more — with Inputs/Style/Visibility dialogs and a Pine-like `ta` primitive library.
+- **Strategies (Python)**: a dock below the chart like TradingView's Pine Editor + Strategy Tester, but scripted in **Python** with a Pine-shaped API (`strategy.entry/exit/close`, `ta.*`, `input.*`, `plot*`, `close[1]` history). Broker emulator with TradingView's fill rules (next-bar fills, intrabar path, limit/stop/stop-limit, trailing stops, pyramiding, commission, slippage, margin, risk rules) and the full report: Overview with equity/drawdown chart, Performance, Trades analysis, Risk/performance ratios (Sharpe, Sortino), List of trades with CSV export, Properties; entries/exits drawn on the chart. Off by default; Python runs in the browser via Pyodide fetched on demand (no package dependency). See [docs/STRATEGY.md](docs/STRATEGY.md).
 - **UI**: top toolbar (symbol search, intervals with favorites, chart types, indicators, templates, undo/redo, settings, fullscreen, snapshot), left drawing toolbar with grouped flyouts and favorites, floating drawing toolbar, context menus, chart settings dialog (Symbol/Status line/Scales/Appearance…), bottom bar (date ranges, timezone, %/log/auto), light & dark themes, save/load layouts, screenshots.
 
 ## Install
@@ -98,6 +99,27 @@ const datafeed = {
   unsubscribeBars(guid) {},
 };
 ```
+
+## Python strategies
+
+```js
+const chart = new Chart({ container: '#chart', datafeed, symbol: 'BTCUSD', strategy: { enabled: true } });
+```
+
+```python
+strategy("MA Cross", overlay=True, initial_capital=100000,
+         default_qty_type=strategy.percent_of_equity, default_qty_value=10)
+fast = ta.sma(close, input.int(9, "Fast length"))
+slow = ta.sma(close, input.int(21, "Slow length"))
+plot(fast, "Fast", color=color.blue)
+plot(slow, "Slow", color=color.orange)
+if ta.crossover(fast, slow):
+    strategy.entry("Long", strategy.long)
+if ta.crossunder(fast, slow):
+    strategy.entry("Short", strategy.short)
+```
+
+Click **Add to chart** (or `⌘/Ctrl+Enter`) and the Strategy Tester fills with the report. The script runs once per bar with Pine Script semantics, so TradingView strategies translate line by line. Full reference: [docs/STRATEGY.md](docs/STRATEGY.md).
 
 ## API overview
 

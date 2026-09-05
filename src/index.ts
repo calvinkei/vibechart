@@ -33,4 +33,17 @@ import './ui/index';
 registerBuiltinIndicators();
 registerBuiltinDrawings();
 
-export const version = '0.1.0';
+export { StrategyController, DEFAULT_STRATEGY_SCRIPT } from './strategy/StrategyEngine';
+export type { StrategyOptions, StrategyState, StrategyEvents, StrategyPanelTab, SavedStrategy } from './strategy/StrategyEngine';
+export { Broker } from './strategy/Broker';
+export { buildReport, monthlyReturns, sharpeRatio, sortinoRatio } from './strategy/metrics';
+export { PyodideRunner } from './strategy/PythonRunner';
+export type { PythonRunner, PythonJob, PythonRunResult } from './strategy/PythonRunner';
+export { defaultStrategyProperties } from './strategy/types';
+export type {
+  StrategyProperties, StrategyBar, BacktestReport, MetricsGroup, ClosedTrade, OpenTrade, EquityPoint, FillEvent, PendingOrder,
+  StrategyPlot, StrategyInputDef, StrategyError, StrategyLog, PythonRunOutput, OrderParams, ExitParams,
+} from './strategy/types';
+export { createCodeEditor, highlightPython } from './ui/codeEditor';
+
+export const version = '0.2.0';

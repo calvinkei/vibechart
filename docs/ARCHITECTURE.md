@@ -42,3 +42,14 @@ events (`contextMenu`, `openDialog`, `toolChanged`, `drawingSelected`, ...). `op
 ## Tests
 `npm test` runs vitest: core scales/format/session/synthetic/loader tests, indicator value tests, drawing geometry tests and a
 smoke test that renders every registered drawing tool with a mock canvas (`test/helpers/mockCanvas.ts`).
+
+## Strategies (`src/strategy`)
+
+- `Broker.ts` — the broker emulator: pending orders, TradingView's intrabar fill path, entry/order/exit/close semantics, pyramiding, commission, slippage, margin, risk rules, trades, fills and the equity curve. Driven bar by bar (`beginBar(i)` → script → `endBar(i)`) and never looks ahead.
+- `metrics.ts` — `buildReport()` turns the broker state into the Strategy Tester report (All/Long/Short groups, monthly returns, Sharpe/Sortino).
+- `prelude.ts` — the Python runtime as a string: `Series` with the `[]` history operator and lazy arithmetic, call-site keyed `ta.*` state, `input.*`, `plot*`, the `strategy` namespace whose commands call the JS `_bridge`, and the `_run` loop.
+- `PythonRunner.ts` — `PyodideRunner` loads Pyodide from a CDN on demand, sets the bridge as a Python global per run, runs the script in chunks (yielding to the UI, cancellable) and collects plots/inputs/logs. `PythonRunner` is an interface, so a server-side runner can replace it.
+- `StrategyEngine.ts` — `StrategyController`: script/inputs/properties state, runs, builds the report, and shows the strategy on the chart as a dynamic `IndicatorDefinition` (plots through the indicator pipeline, trades via `customRender`). Re-runs when the bar count changes.
+- UI: `ui/bottomPanel.ts` (dock, editor toolbar, console, script library in localStorage), `ui/codeEditor.ts` (textarea + highlighted mirror), `ui/strategyTester.ts` (report tabs and equity chart), `ui/dialogs/strategySettings.ts` (Inputs / Properties / Style).
+
+The chart creates the controller only when constructed with `strategy: { enabled: true }` (or `chart.enableStrategy()`), so nothing strategy-related runs otherwise.
